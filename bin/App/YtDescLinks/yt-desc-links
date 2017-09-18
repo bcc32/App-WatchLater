@@ -2,6 +2,8 @@
 use strict;
 use warnings;
 
+package App::YtDescLinks;
+
 use feature qw(say switch);
 
 use Getopt::Long qw(:config auto_help bundling);
@@ -9,13 +11,7 @@ use List::Util qw(any);
 use Pod::Usage;
 use URI::Find;
 
-my $dir;
-BEGIN {
-    use FindBin;
-    $dir = $FindBin::RealBin . '/../lib/';
-}
-use lib $dir;
-use API qw(request_description_and_thumbnails);
+use App::YtDescLinks::API qw(api_key request_description_and_thumbnails);
 
 use version; our $VERSION = version->declare('v1.0.0');
 
@@ -33,7 +29,8 @@ if ($opts{version}) {
     exit;
 }
 
-$API::KEY = $opts{'api-key'} || $ENV{YT_API_KEY} or die 'no API key, aborting';
+my $key = $opts{'api-key'} || $ENV{YT_API_KEY} or die 'no API key, aborting';
+api_key $key;
 
 while (my $video_id = <>) {
     chomp $video_id;
@@ -83,7 +80,7 @@ __END__
 
 =head1 NAME
 
-yt-desc-links - display links to thumbnail image and links from description
+App::YtDescLinks - display links to thumbnail image and links from description
 
 =head1 SYNOPSIS
 

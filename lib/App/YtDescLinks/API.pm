@@ -1,14 +1,15 @@
+#!/usr/bin/env perl
 use strict;
 use warnings;
 
-package API;
+package App::YtDescLinks::API;
 
 BEGIN {
     require Exporter;
     our @ISA = qw(Exporter);
 
     our @EXPORT = ();
-    our @EXPORT_OK = qw(request_description_and_thumbnails);
+    our @EXPORT_OK = qw(api_key request_description_and_thumbnails);
 
     use version; our $VERSION = version->declare('v1.0.0');
 }
@@ -24,6 +25,14 @@ BEGIN {
 
 our $KEY;
 our $http = HTTP::Tiny->new;
+
+sub api_key {
+    my ($key) = @_;
+    if (defined $key) {
+        $KEY = $key;
+    }
+    $KEY;
+}
 
 sub request {
     my ($method, $endpoint, $params) = @_;
