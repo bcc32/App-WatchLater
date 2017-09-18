@@ -40,12 +40,24 @@ my $should_filter;
 my $api_key;
 
 GetOptions(
-    'filter|f!' => \$should_filter,
+    'filter|f!'   => \$should_filter,
     'api-key|k:s' => \$api_key,
-) or die 'invalid options, aborting';
+) or pod2usage(2);
 
 $api_key ||= $ENV{YT_API_KEY};
 die 'no API key, aborting' unless $api_key;
+
+pod2usage(2) if @ARGV;
+
+while (my $video_id = <STDIN>) {
+    chomp $video_id;
+    $video_id =~ s/.*watch\?v=([a-zA-Z0-9_-]+).*/$1/;
+    my ($desc, $thumbnails) = request_description_and_thumbnails($video_id);
+    next unless defined $desc;
+    say $video_id;
+    say biggest_thumbnail($thumbnails);
+    say_uris($desc);
+}
 
 sub make_request {
     my ($method, $endpoint, $opts) = @_;
@@ -123,21 +135,3 @@ sub biggest_thumbnail {
     }
     $url;
 }
-
-sub main {
-    for (@ARGV) {
-        warn "unrecognized option $_, ignoring";
-    }
-
-    while (my $video_id = <STDIN>) {
-        chomp $video_id;
-        $video_id =~ s/.*watch\?v=([a-zA-Z0-9_-]+).*/$1/;
-        my ($desc, $thumbnails) = request_description_and_thumbnails($video_id);
-        next unless defined $desc;
-        say $video_id;
-        say biggest_thumbnail($thumbnails);
-        say_uris($desc);
-    }
-}
-
-main;
