@@ -28,7 +28,7 @@ $API::KEY = $opts{'api-key'} || $ENV{YT_API_KEY} or die 'no API key, aborting';
 
 while (my $video_id = <>) {
     chomp $video_id;
-    $video_id =~ s/.*watch\?v=([a-zA-Z0-9_-]+).*/$1/;
+    $video_id =~ s/.*\bv=([a-zA-Z0-9_-]+).*/$1/;
     my ($desc, $thumbnails) = request_description_and_thumbnails($video_id);
     next unless defined $desc;
     say $video_id;
@@ -51,16 +51,9 @@ sub should_print {
     any { $uri =~ $_ } FILTERS;
 }
 
-sub say_uri {
-    my ($uri) = $_[0];
-    say $uri if should_print $uri;
-
-    $uri;
-}
-
 sub say_uris {
     my ($text) = @_;
-    my $finder = URI::Find->new(\&say_uri);
+    my $finder = URI::Find->new(sub { say $_[1] if should_print $_[1] });
     $finder->find(\$text);
 }
 
