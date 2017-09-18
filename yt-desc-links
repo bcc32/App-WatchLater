@@ -2,18 +2,53 @@
 use strict;
 use warnings;
 
+=head1 NAME
+
+yt-desc-links - display links to thumbnail image and links from description
+
+=head1 SYNOPSIS
+
+    yt-desc-links [OPTION]...
+
+    -f, --[no]filter  only display links from common image sites (e.g., pixiv)
+    --help            display this help message
+
+=head1 DESCRIPTION
+
+Accepts YouTube video IDs or watch URLs from stdin, and prints the ID, followed
+by the thumbnail link, followed by description links, to stdout.
+
+=head1 AUTHOR
+
+Aaron L. Zeng C<<me@bcc32.com>>
+
+=cut
+
 use feature qw(say switch);
 
+use Getopt::Long qw(:config auto_help bundling);
+use List::Util qw(any);
+use Pod::Usage;
 use URI::Escape;
+use URI::Find;
 
-our $API_KEY = $ENV{YT_API_KEY} or die 'no API key, aborting';
+my $should_filter;
+my $api_key;
+
+GetOptions(
+    'filter|f!' => \$should_filter,
+    'api-key|k:s' => \$api_key,
+) or die 'invalid options, aborting';
+
+$api_key ||= $ENV{YT_API_KEY};
+die 'no API key, aborting' unless $api_key;
 
 sub make_request {
     my ($method, $endpoint, $opts) = @_;
     my $url = 'https://www.googleapis.com' . $endpoint;
     my $query = '';
 
-    $$opts{key} = $API_KEY;
+    $$opts{key} = $api_key;
 
     for my $key (keys %$opts) {
         my $val = $$opts{$key};
@@ -44,26 +79,29 @@ sub request_description_and_thumbnails {
     $item->{snippet}{description}, $item->{snippet}{thumbnails};
 }
 
-our @FILTERS;
+use constant FILTERS => (
+    qr/pixiv/,
+    qr/deviantart/,
+    qr/imgur/,
+    qr/zerochan/,
+    qr/anime-pictures/,
+);
+
+sub should_print {
+    return 1 unless $should_filter;
+
+    my ($uri) = @_;
+    any { $uri =~ $_ } FILTERS;
+}
 
 sub say_uri {
     my ($uri) = $_[0];
-    if (!@FILTERS) {
-        say $uri;
-    } else {
-        for my $pat (@FILTERS) {
-            if ($uri =~ $pat) {
-                say $uri;
-                last;
-            }
-        }
-    }
+    say $uri if should_print $uri;
 
     $uri;
 }
 
 sub say_uris {
-    use URI::Find;
     my ($text) = @_;
     my $finder = URI::Find->new(\&say_uri);
     $finder->find(\$text);
@@ -83,29 +121,13 @@ sub biggest_thumbnail {
 }
 
 sub main {
-    for my $arg (@ARGV) {
-        if ($arg eq '-q') {
-            push @FILTERS, (
-                qr/ytimg/,
-                qr/pixiv/,
-                qr/deviantart/,
-                qr/imgur/,
-                qr/zerochan/,
-                qr/anime-pictures/,
-            );
-            shift @ARGV;
-        } else {
-            warn "unrecognized flag $_, ignoring";
-        }
-    }
-
     while (my $video_id = <STDIN>) {
         chomp $video_id;
         $video_id =~ s/.*watch\?v=([a-zA-Z0-9_-]+).*/$1/;
         my ($desc, $thumbnails) = request_description_and_thumbnails($video_id);
         next unless defined $desc;
         say $video_id;
-        say_uri(biggest_thumbnail($thumbnails));
+        say biggest_thumbnail($thumbnails);
         say_uris($desc);
     }
 }
