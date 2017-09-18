@@ -17,14 +17,21 @@ BEGIN {
 use lib $dir;
 use API qw(request_description_and_thumbnails);
 
-our $VERSION = v1.00;
+use version; our $VERSION = version->declare('v1.0.0');
 
 my %opts;
 
-GetOptions(\%opts,
+GetOptions(
+    \%opts,
     'filter|f!',
     'api-key|k:s',
+    'version|v',
 ) or pod2usage(2);
+
+if ($opts{version}) {
+    say "yt-desc-links version $VERSION";
+    exit;
+}
 
 $API::KEY = $opts{'api-key'} || $ENV{YT_API_KEY} or die 'no API key, aborting';
 
