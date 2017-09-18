@@ -45,7 +45,7 @@ sub request_description_and_thumbnails {
     my $json = request('GET', '/youtube/v3/videos', {
         id => $video_id,
         part => 'snippet',
-                            });
+    });
     my $obj = decode_json($json);
     my $item = $obj->{items}[0];
     unless (defined $item) {
