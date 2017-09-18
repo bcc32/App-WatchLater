@@ -17,6 +17,11 @@ use HTTP::Tiny;
 use JSON;
 use URI::Escape;
 
+BEGIN {
+    my ($ok, $why) = HTTP::Tiny->can_ssl;
+    die $why unless $ok;
+}
+
 our $KEY;
 our $http = HTTP::Tiny->new;
 
