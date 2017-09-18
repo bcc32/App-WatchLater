@@ -36,16 +36,15 @@ use Pod::Usage;
 use URI::Escape;
 use URI::Find;
 
-my $should_filter;
-my $api_key;
+my %opts;
 
-GetOptions(
-    'filter|f!'   => \$should_filter,
-    'api-key|k:s' => \$api_key,
+GetOptions(\%opts,
+    'filter|f!',
+    'api-key|k:s',
 ) or pod2usage(2);
 
-$api_key ||= $ENV{YT_API_KEY};
-die 'no API key, aborting' unless $api_key;
+$opts{'api-key'} ||= $ENV{YT_API_KEY};
+die 'no API key, aborting' unless $opts{'api-key'};
 
 pod2usage(2) if @ARGV;
 
@@ -60,14 +59,15 @@ while (my $video_id = <STDIN>) {
 }
 
 sub make_request {
-    my ($method, $endpoint, $opts) = @_;
+    my ($method, $endpoint, $params) = @_;
     my $url = 'https://www.googleapis.com' . $endpoint;
     my $query = '';
 
-    $$opts{key} = $api_key;
+    my %params = %$params;
+    $params{key} = $opts{'api-key'};
 
-    for my $key (keys %$opts) {
-        my $val = $$opts{$key};
+    for my $key (keys %params) {
+        my $val = $params{$key};
         $query .= '&' . uri_escape($key) . '=' . uri_escape($val);
     }
 
@@ -104,7 +104,7 @@ use constant FILTERS => (
 );
 
 sub should_print {
-    return 1 unless $should_filter;
+    return 1 unless $opts{filter};
 
     my ($uri) = @_;
     any { $uri =~ $_ } FILTERS;
