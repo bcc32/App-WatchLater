@@ -1,3 +1,7 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+
 use ExtUtils::MakeMaker;
 
 my $script = 'bin/App/YtDescLinks/yt-desc-links';
