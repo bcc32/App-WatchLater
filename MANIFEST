@@ -1,5 +1,6 @@
 bin/App/YtDescLinks/yt-desc-links
 Changes.org
+INSTALL
 lib/App/YtDescLinks/API.pm
 LICENSE
 Makefile.PL
