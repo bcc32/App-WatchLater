@@ -30,11 +30,14 @@ Aaron L. Zeng <me@bcc32.com>
 
 use feature qw(say switch);
 
+use FindBin;
 use Getopt::Long qw(:config auto_help bundling);
 use List::Util qw(any);
 use Pod::Usage;
-use URI::Escape;
 use URI::Find;
+
+use lib "$FindBin::RealBin/../lib";
+use API qw(request_description_and_thumbnails);
 
 my %opts;
 
@@ -43,8 +46,7 @@ GetOptions(\%opts,
     'api-key|k:s',
 ) or pod2usage(2);
 
-$opts{'api-key'} ||= $ENV{YT_API_KEY};
-die 'no API key, aborting' unless $opts{'api-key'};
+$API::KEY = $opts{'api-key'} || $ENV{YT_API_KEY} or die 'no API key, aborting';
 
 while (my $video_id = <>) {
     chomp $video_id;
@@ -54,43 +56,6 @@ while (my $video_id = <>) {
     say $video_id;
     say biggest_thumbnail($thumbnails);
     say_uris($desc);
-}
-
-sub make_request {
-    my ($method, $endpoint, $params) = @_;
-    my $url = 'https://www.googleapis.com' . $endpoint;
-    my $query = '';
-
-    my %params = %$params;
-    $params{key} = $opts{'api-key'};
-
-    for my $key (keys %params) {
-        my $val = $params{$key};
-        $query .= '&' . uri_escape($key) . '=' . uri_escape($val);
-    }
-
-    $query =~ s/^./?/;
-    $url .= $query;
-
-    open my $fh, "curl -sS -X $method \"$url\" |";
-    undef local $/;
-    <$fh>;
-}
-
-sub request_description_and_thumbnails {
-    use JSON;
-    my ($video_id) = @_;
-    my $json = make_request('GET', '/youtube/v3/videos', {
-        id => $video_id,
-        part => 'snippet',
-    });
-    my $obj = decode_json($json);
-    my $item = $obj->{items}[0];
-    unless (defined $item) {
-        warn "couldn't find video with id $video_id, skipping";
-        return;
-    }
-    $item->{snippet}{description}, $item->{snippet}{thumbnails};
 }
 
 use constant FILTERS => (
