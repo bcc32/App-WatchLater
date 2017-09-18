@@ -36,11 +36,10 @@ sub api_key {
 }
 
 sub request {
-    my ($method, $endpoint, $params) = @_;
+    my ($method, $endpoint, %params) = @_;
     my $url = 'https://www.googleapis.com' . $endpoint;
     my $query = '';
 
-    my %params = %$params;
     $params{key} = $KEY;
 
     for my $key (keys %params) {
@@ -59,10 +58,11 @@ sub request {
 
 sub request_description_and_thumbnails {
     my ($video_id) = @_;
-    my $json = request('GET', '/youtube/v3/videos', {
-        id => $video_id,
+    my $json = request(
+        'GET', '/youtube/v3/videos',
+        id   => $video_id,
         part => 'snippet',
-    });
+    );
     my $obj = decode_json($json);
     my $item = $obj->{items}[0];
     unless (defined $item) {
