@@ -10,7 +10,7 @@ BEGIN {
     our @EXPORT = ();
     our @EXPORT_OK = qw(request_description_and_thumbnails);
 
-    our $VERSION = v0.01;
+    our $VERSION = v1.00;
 }
 
 use HTTP::Tiny;

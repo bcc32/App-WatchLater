@@ -17,6 +17,8 @@ BEGIN {
 use lib $dir;
 use API qw(request_description_and_thumbnails);
 
+our $VERSION = v1.00;
+
 my %opts;
 
 GetOptions(\%opts,
