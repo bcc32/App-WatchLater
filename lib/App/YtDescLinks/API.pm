@@ -14,13 +14,14 @@ BEGIN {
     use version; our $VERSION = version->declare('v1.0.0');
 }
 
+use Carp;
 use HTTP::Tiny;
 use JSON;
 use URI::Escape;
 
 BEGIN {
     my ($ok, $why) = HTTP::Tiny->can_ssl;
-    die $why unless $ok;
+    croak $why unless $ok;
 }
 
 our $KEY;
@@ -51,7 +52,7 @@ sub request {
     $url .= $query;
 
     my $response = $http->request($method, $url);
-    die "$response->{status} $response->{reason}" unless $response->{success};
+    croak "$response->{status} $response->{reason}" unless $response->{success};
     $response->{content};
 }
 
@@ -65,7 +66,7 @@ sub request_description_and_thumbnails {
     my $obj = decode_json($json);
     my $item = $obj->{items}[0];
     unless (defined $item) {
-        warn "couldn't find video with id $video_id, skipping";
+        croak "couldn't find video with id $video_id";
         return;
     }
     $item->{snippet}{description}, $item->{snippet}{thumbnails};
