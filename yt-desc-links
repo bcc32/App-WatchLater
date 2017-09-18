@@ -1,0 +1,113 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+
+use feature qw(say switch);
+
+use URI::Escape;
+
+our $API_KEY = $ENV{YT_API_KEY} or die 'no API key, aborting';
+
+sub make_request {
+    my ($method, $endpoint, $opts) = @_;
+    my $url = 'https://www.googleapis.com' . $endpoint;
+    my $query = '';
+
+    $$opts{key} = $API_KEY;
+
+    for my $key (keys %$opts) {
+        my $val = $$opts{$key};
+        $query .= '&' . uri_escape($key) . '=' . uri_escape($val);
+    }
+
+    $query =~ s/^./?/;
+    $url .= $query;
+
+    open my $fh, "curl -sS -X $method \"$url\" |";
+    undef local $/;
+    <$fh>;
+}
+
+sub request_description_and_thumbnails {
+    use JSON;
+    my ($video_id) = @_;
+    my $json = make_request('GET', '/youtube/v3/videos', {
+        id => $video_id,
+        part => 'snippet',
+    });
+    my $obj = decode_json($json);
+    my $item = $obj->{items}[0];
+    unless (defined $item) {
+        warn "couldn't find video with id $video_id, skipping";
+        return;
+    }
+    $item->{snippet}{description}, $item->{snippet}{thumbnails};
+}
+
+our @FILTERS;
+
+sub say_uri {
+    my ($uri) = $_[0];
+    if (!@FILTERS) {
+        say $uri;
+    } else {
+        for my $pat (@FILTERS) {
+            if ($uri =~ $pat) {
+                say $uri;
+                last;
+            }
+        }
+    }
+
+    $uri;
+}
+
+sub say_uris {
+    use URI::Find;
+    my ($text) = @_;
+    my $finder = URI::Find->new(\&say_uri);
+    $finder->find(\$text);
+}
+
+sub biggest_thumbnail {
+    my ($href) = @_;
+    my $maxw = 0;
+    my $url;
+    for my $thumb (values %$href) {
+        if ($thumb->{width} > $maxw) {
+            $maxw = $thumb->{width};
+            $url = $thumb->{url};
+        }
+    }
+    $url;
+}
+
+sub main {
+    for my $arg (@ARGV) {
+        if ($arg eq '-q') {
+            push @FILTERS, (
+                qr/ytimg/,
+                qr/pixiv/,
+                qr/deviantart/,
+                qr/imgur/,
+                qr/zerochan/,
+                qr/anime-pictures/,
+            );
+            shift @ARGV;
+        } else {
+            warn "unrecognized flag $_, ignoring";
+        }
+    }
+
+    while (my $video_id = <STDIN>) {
+        chomp $video_id;
+        $video_id =~ s/.*watch\?v=([a-zA-Z0-9_-]+).*/$1/;
+        my ($desc, $thumbnails) = request_description_and_thumbnails($video_id);
+        next unless defined $desc;
+        say $video_id;
+        say_uri(biggest_thumbnail($thumbnails));
+        say_uris($desc);
+    }
+}
+
+main;
