@@ -46,9 +46,7 @@ GetOptions(\%opts,
 $opts{'api-key'} ||= $ENV{YT_API_KEY};
 die 'no API key, aborting' unless $opts{'api-key'};
 
-pod2usage(2) if @ARGV;
-
-while (my $video_id = <STDIN>) {
+while (my $video_id = <>) {
     chomp $video_id;
     $video_id =~ s/.*watch\?v=([a-zA-Z0-9_-]+).*/$1/;
     my ($desc, $thumbnails) = request_description_and_thumbnails($video_id);
