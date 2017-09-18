@@ -10,9 +10,9 @@ yt-desc-links - display links to thumbnail image and links from description
 
     yt-desc-links [OPTION]...
 
-    -f, --[no]filter  only display links from common image sites (e.g., pixiv)
-    -k, --api-key     set the YouTube API key
-    --help            display this help message
+    -f, --[no]filter   only display links from common image sites (e.g., pixiv)
+    -k, --api-key KEY  set the YouTube Data API key
+    --help             display this help message
 
 =head1 DESCRIPTION
 
