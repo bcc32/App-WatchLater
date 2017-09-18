@@ -13,10 +13,12 @@ BEGIN {
     our $VERSION = v0.01;
 }
 
+use HTTP::Tiny;
 use JSON;
 use URI::Escape;
 
 our $KEY;
+our $http = HTTP::Tiny->new;
 
 sub request {
     my ($method, $endpoint, $params) = @_;
@@ -34,9 +36,9 @@ sub request {
     $query =~ s/^./?/;
     $url .= $query;
 
-    open my $fh, "curl -sS -X $method \"$url\" |";
-    undef local $/;
-    <$fh>;
+    my $response = $http->request($method, $url);
+    die "$response->{status} $response->{reason}" unless $response->{success};
+    $response->{content};
 }
 
 
