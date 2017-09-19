@@ -90,8 +90,6 @@ sub biggest_thumbnail {
     $url;
 }
 
-__END__
-
 =head1 NAME
 
 App::YtDescLinks - display links to thumbnail image and links from description
@@ -100,18 +98,32 @@ App::YtDescLinks - display links to thumbnail image and links from description
 
     yt-desc-links [OPTION]...
 
-    -f, --[no]filter          only display links from common image sites (e.g., pixiv)
-    -k, --api-key KEY         set the YouTube Data API key
-    -t, --access-token TOKEN  set the YouTube Data API access token (OAuth)
-    --help                    display this help message
+    -f, --[no]filter    only display links from common image sites (e.g., pixiv)
+    -k, --api-key       set the YouTube Data API key
+    -t, --access-token  set the YouTube Data API access token (OAuth)
+    --help              display this help message
 
 =head1 DESCRIPTION
 
 Accepts YouTube video IDs or watch URLs from stdin, and prints the ID, followed
 by the thumbnail link, followed by description links, to stdout.
 
-An API key is required to access the YouTube Data API. It may be specified on
-the command line (C<-k>) or by environment variable (C<YT_API_KEY>).
+An API key is required to access the YouTube Data API. Alternatively, requests
+may be authorized by providing an OAuth access token.
+
+=head1 ENVIRONMENT
+
+=over 4
+
+=item YT_API_KEY
+
+Set the YouTube Data API key. Can be overridden by command line argument.
+
+=item YT_ACCESS_TOKEN
+
+Set the OAuth access token. Can be overridden by command line argument.
+
+=back
 
 =head1 AUTHOR
 

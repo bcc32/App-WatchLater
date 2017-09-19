@@ -116,7 +116,7 @@ my $refresh_token;
 GetOptions(
     'client-id|i=s' => \$CLIENT_ID,
     'client-secret|s=s' => \$CLIENT_SECRET,
-    'refresh-token|r:s' => \$refresh_token,
+    'refresh-token|r=s' => \$refresh_token,
 ) or pod2usage(2);
 
 $CLIENT_ID     ||= $ENV{YT_CLIENT_ID};
@@ -142,9 +142,9 @@ say "refresh token: $refresh_token";
 
     yt-oauth --client-id=ID --client-secret=SECRET [--refresh-token=TOKEN]
 
-        -i, --client-id     ID      set the client ID
-        -s, --client-secret SECRET  set the client secret
-        -t, --refresh-token TOKEN   get a fresh access token using TOKEN
+        -i, --client-id      set the client ID
+        -s, --client-secret  set the client secret
+        -r, --refresh-token  get a fresh access token using TOKEN
 
 =head1 DESCRIPTION
 
@@ -153,7 +153,24 @@ refresh token. Access token can be used to authorize API requests, and
 furthermore provides access to user data. Access tokens will expire, so a new
 one can be requested using the refresh token (B<--refresh-token>).
 
-Options B<--client-id> and B<--client-secret> are mandatory.
+Client ID and client secret are mandatory, and may be provided on the command
+line or by environment variable. A client ID and secret can be obtained from
+Google's L<API Console|https://console.developers.google.com/apis/credentials>.
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<-i> I<id>, B<--client-id>=I<id>
+=item B<-s> I<secret>, B<--client-secret>=I<secret>
+
+=item B<-t> I<token>, B<--refresh-token>=I<token>
+
+Obtain an access token using the provided refresh token instead of asking the
+user to authorize. Refresh tokens may be stored and reused until they are
+revoked by the user, while access tokens expire after a short amount of time.
+
+=back
 
 =head1 AUTHOR
 
