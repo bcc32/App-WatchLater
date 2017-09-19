@@ -11,6 +11,7 @@ use Getopt::Long qw(:config auto_help bundling);
 use HTTP::Tiny;
 use JSON;
 use Pod::Usage;
+use Socket;
 
 use version; our $VERSION = version->declare('v1.0.0');
 
@@ -31,39 +32,47 @@ use constant OAUTH_URL_TEMPLATE => <<URL;
     &client_id=CLIENT_ID
 URL
 
-# TODO do this right instead of shelling out to nc
+sub listen_for_code {
+    my ($pipe, $sock) = @_;
+    listen($sock, SOMAXCONN) or die "listen: $!";
+    accept(my $client, $sock);
+    select $client; $| = 1;
+    print "204 No Content\r\n\r\n";
+    my $response = <$client>;
+    close $client;
+    close $sock;
+    print $pipe $response;
+    close $pipe;
+    exit;
+}
 
-# sub listen {
-#     my ($pipe) = @_;
-# }
+sub start_http_listener {
+    # setup pipe to communicate response back to parent
+    pipe(my $r, my $w) or die "pipe: $!";
 
-# sub start_http_listener {
-#     # setup pipe to communicate response back to parent
-#     pipe my $r, my $w or confess "pipe: $!";
+    # setup socket for listening
+    socket(my $sock, PF_INET, SOCK_STREAM, 0) or die "socket: $!";
+    my $sockaddr = pack_sockaddr_in 0, v127.0.0.1;
+    bind($sock, $sockaddr) or die "bind: $!";
+    my ($port) = unpack_sockaddr_in getsockname $sock;
 
-#     # setup socket for listening
-#     socket my $sock, PF_INET, SOCK_STREAM, 0 or die "socket: $!";
-#     my $sockaddr = pack_sockaddr_in 0, v127.0.0.1;
-#     bind $sock, $sockaddr or die "bind: $!";
-
-#     # and now we fork
-#     my $pid = fork;
-#     defined $pid or confess "fork: $!";
-#     if ($pid) {
-#         # parent
-#         close $w;
-#         my @resp = <$r>;
-#     } else {
-#         # child
-#         close $r;
-#         listen $w;
-#     }
-# }
+    # and now we fork
+    my $pid = fork;
+    defined $pid or die "fork: $!";
+    if ($pid) {
+        # parent
+        close $w;
+        close $sock;
+        return ($port, $r);
+    } else {
+        # child
+        close $r;
+        listen_for_code $w, $sock;
+    }
+}
 
 sub authenticate {
-    my $port = 8383;
-
-    open my $fh, "echo '204 No Content\r\n' | nc -l $port |";
+    my ($port, $fh) = start_http_listener;
 
     my $oauth_url = OAUTH_URL_TEMPLATE;
     $oauth_url =~ s/CLIENT_ID/$CLIENT_ID/;
@@ -79,17 +88,17 @@ sub authenticate {
     }
 
     $response =~ m{GET /\?code=(\S+) HTTP/1.1} or confess "didn't authenticate";
-    $1;
+    $1, "http://127.0.0.1:$port";
 }
 
 sub get_tokens {
-    my ($auth_code) = @_;
+    my ($auth_code, $redirect_uri) = @_;
     my $resp = $http->post_form('https://www.googleapis.com/oauth2/v4/token', {
         code          => $auth_code,
         client_id     => $CLIENT_ID,
         client_secret => $CLIENT_SECRET,
         grant_type    => 'authorization_code',
-        redirect_uri  => 'http://127.0.0.1:8383',
+        redirect_uri  => $redirect_uri,
     });
     croak "$resp->{status} $resp->{reason}" unless $resp->{success};
     my $json = $resp->{content};
@@ -127,8 +136,8 @@ pod2usage(2) unless defined $CLIENT_ID && defined $CLIENT_SECRET;
 if (defined $refresh_token) {
     $access_token = refresh_access($refresh_token);
 } else {
-    my $auth_code = authenticate;
-    ($access_token, $refresh_token) = get_tokens $auth_code;
+    my ($auth_code, $redirect_uri) = authenticate;
+    ($access_token, $refresh_token) = get_tokens $auth_code, $redirect_uri;
 }
 
 say "access token: $access_token";
