@@ -1,0 +1,162 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+
+package App::YtDescLinks;
+
+use feature qw(say);
+
+use Carp;
+use Getopt::Long qw(:config auto_help bundling);
+use HTTP::Tiny;
+use JSON;
+use Pod::Usage;
+
+use version; our $VERSION = version->declare('v1.0.0');
+
+BEGIN {
+    my ($ok, $why) = HTTP::Tiny->can_ssl;
+    croak $why unless $ok;
+}
+
+our $CLIENT_ID;
+our $CLIENT_SECRET;
+our $http = HTTP::Tiny->new;
+
+use constant OAUTH_URL_TEMPLATE => <<URL;
+  https://accounts.google.com/o/oauth2/v2/auth
+    ?scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutube.readonly
+    &response_type=code
+    &redirect_uri=http://127.0.0.1:PORT
+    &client_id=CLIENT_ID
+URL
+
+# TODO do this right instead of shelling out to nc
+
+# sub listen {
+#     my ($pipe) = @_;
+# }
+
+# sub start_http_listener {
+#     # setup pipe to communicate response back to parent
+#     pipe my $r, my $w or confess "pipe: $!";
+
+#     # setup socket for listening
+#     socket my $sock, PF_INET, SOCK_STREAM, 0 or die "socket: $!";
+#     my $sockaddr = pack_sockaddr_in 0, v127.0.0.1;
+#     bind $sock, $sockaddr or die "bind: $!";
+
+#     # and now we fork
+#     my $pid = fork;
+#     defined $pid or confess "fork: $!";
+#     if ($pid) {
+#         # parent
+#         close $w;
+#         my @resp = <$r>;
+#     } else {
+#         # child
+#         close $r;
+#         listen $w;
+#     }
+# }
+
+sub authenticate {
+    my $port = 8383;
+
+    open my $fh, "echo '204 No Content\r\n' | nc -l $port |";
+
+    my $oauth_url = OAUTH_URL_TEMPLATE;
+    $oauth_url =~ s/CLIENT_ID/$CLIENT_ID/;
+    $oauth_url =~ s/PORT/$port/;
+    $oauth_url =~ s/\s//g;
+    say "Please visit $oauth_url in your browser.";
+
+    my $response = <$fh>;
+    close $fh;
+
+    if ($response =~ m{GET /\?error=(\S+) HTTP/1.1}) {
+        croak "error authenticating: $1";
+    }
+
+    $response =~ m{GET /\?code=(\S+) HTTP/1.1} or confess "didn't authenticate";
+    $1;
+}
+
+sub get_tokens {
+    my ($auth_code) = @_;
+    my $resp = $http->post_form('https://www.googleapis.com/oauth2/v4/token', {
+        code          => $auth_code,
+        client_id     => $CLIENT_ID,
+        client_secret => $CLIENT_SECRET,
+        grant_type    => 'authorization_code',
+        redirect_uri  => 'http://127.0.0.1:8383',
+    });
+    croak "$resp->{status} $resp->{reason}" unless $resp->{success};
+    my $json = $resp->{content};
+    my $obj = decode_json($json);
+    $obj->{access_token}, $obj->{refresh_token};
+}
+
+sub refresh_access {
+    my ($refresh_token) = @_;
+    my $resp = $http->post_form('https://www.googleapis.com/oauth2/v4/token', {
+        refresh_token => $refresh_token,
+        client_id     => $CLIENT_ID,
+        client_secret => $CLIENT_SECRET,
+        grant_type    => 'refresh_token',
+    });
+    croak "$resp->{status} $resp->{reason}" unless $resp->{success};
+    my $json = $resp->{content};
+    my $obj = decode_json($json);
+    $obj->{access_token};
+}
+
+my $access_token;
+my $refresh_token;
+GetOptions(
+    'client-id|i=s' => \$CLIENT_ID,
+    'client-secret|s=s' => \$CLIENT_SECRET,
+    'refresh-token|r:s' => \$refresh_token,
+) or pod2usage(2);
+
+$CLIENT_ID     ||= $ENV{YT_CLIENT_ID};
+$CLIENT_SECRET ||= $ENV{YT_CLIENT_SECRET};
+
+pod2usage(2) unless defined $CLIENT_ID && defined $CLIENT_SECRET;
+
+if (defined $refresh_token) {
+    $access_token = refresh_access($refresh_token);
+} else {
+    my $auth_code = authenticate;
+    ($access_token, $refresh_token) = get_tokens $auth_code;
+}
+
+say "access token: $access_token";
+say "refresh token: $refresh_token";
+
+=head1 NAME
+
+    yt-oauth - a simple program for retrieving access and refresh tokens
+
+=head1 SYNOPSIS
+
+    yt-oauth --client-id=ID --client-secret=SECRET [--refresh-token=TOKEN]
+
+        -i, --client-id     ID      set the client ID
+        -s, --client-secret SECRET  set the client secret
+        -t, --refresh-token TOKEN   get a fresh access token using TOKEN
+
+=head1 DESCRIPTION
+
+Authenticate with Google APIs using OAuth. Retrieves an access token and a
+refresh token. Access token can be used to authorize API requests, and
+furthermore provides access to user data. Access tokens will expire, so a new
+one can be requested using the refresh token (B<--refresh-token>).
+
+Options B<--client-id> and B<--client-secret> are mandatory.
+
+=head1 AUTHOR
+
+Aaron L. Zeng <me@bcc32.com>
+
+=cut
