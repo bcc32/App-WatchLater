@@ -9,7 +9,7 @@ BEGIN {
     our @ISA = qw(Exporter);
 
     our @EXPORT = ();
-    our @EXPORT_OK = qw(api_key request_description_and_thumbnails);
+    our @EXPORT_OK = qw(api_key access_token request_description_and_thumbnails);
 
     use version; our $VERSION = version->declare('v1.0.0');
 }
@@ -24,24 +24,37 @@ BEGIN {
 }
 
 our $KEY;
+our $ACCESS_TOKEN;
 our $http = HTTP::Tiny->new;
 
 sub api_key {
     my ($key) = @_;
-    if (defined $key) {
-        $KEY = $key;
-    }
+    $KEY = $key if defined $key;
     $KEY;
+}
+
+sub access_token {
+    my ($access_token) = @_;
+    $ACCESS_TOKEN = $access_token if defined $access_token;
+    $ACCESS_TOKEN;
 }
 
 sub request {
     my ($method, $endpoint, %params) = @_;
     my $url = 'https://www.googleapis.com' . $endpoint;
 
-    $params{key} ||= $KEY;
-    my $query = $http->www_form_urlencode(\%params);
+    my %headers;
 
-    my $response = $http->request($method, "$url?$query");
+    if (defined $ACCESS_TOKEN) {
+        $headers{Authorization} = 'Bearer ' . $ACCESS_TOKEN;
+    } else {
+        $params{key} ||= $KEY;
+    }
+
+    my $query = $http->www_form_urlencode(\%params);
+    my $response = $http->request($method, "$url?$query", {
+        headers => \%headers,
+    });
     croak "$response->{status} $response->{reason}" unless $response->{success};
     $response->{content};
 }

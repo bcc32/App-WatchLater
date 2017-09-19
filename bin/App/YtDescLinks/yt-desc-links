@@ -11,7 +11,11 @@ use List::Util qw(any);
 use Pod::Usage;
 use URI::Find;
 
-use App::YtDescLinks::API qw(api_key request_description_and_thumbnails);
+use App::YtDescLinks::API qw(
+    api_key
+    access_token
+    request_description_and_thumbnails
+);
 
 use version; our $VERSION = version->declare('v1.0.0');
 
@@ -21,6 +25,7 @@ GetOptions(
     \%opts,
     'filter|f!',
     'api-key|k:s',
+    'access-token|t:s',
     'version|v',
 ) or pod2usage(2);
 
@@ -29,8 +34,14 @@ if ($opts{version}) {
     exit;
 }
 
-my $key = $opts{'api-key'} || $ENV{YT_API_KEY} or die 'no API key, aborting';
+my $key = $opts{'api-key'} || $ENV{YT_API_KEY};
 api_key $key;
+my $token = $opts{'access-token'} || $ENV{YT_ACCESS_TOKEN};
+access_token $token;
+
+if (!defined $key && !defined $token) {
+    die "no API key or token, aborting";
+}
 
 while (my $video_id = <>) {
     chomp $video_id;
@@ -89,9 +100,10 @@ App::YtDescLinks - display links to thumbnail image and links from description
 
     yt-desc-links [OPTION]...
 
-    -f, --[no]filter   only display links from common image sites (e.g., pixiv)
-    -k, --api-key KEY  set the YouTube Data API key
-    --help             display this help message
+    -f, --[no]filter          only display links from common image sites (e.g., pixiv)
+    -k, --api-key KEY         set the YouTube Data API key
+    -t, --access-token TOKEN  set the YouTube Data API access token (OAuth)
+    --help                    display this help message
 
 =head1 DESCRIPTION
 
