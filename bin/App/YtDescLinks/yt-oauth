@@ -13,7 +13,7 @@ use JSON;
 use Pod::Usage;
 use Socket;
 
-use version; our $VERSION = version->declare('v1.0.0');
+use version; our $VERSION = version->declare('v1.0.1');
 
 BEGIN {
     my ($ok, $why) = HTTP::Tiny->can_ssl;
