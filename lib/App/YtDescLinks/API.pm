@@ -17,7 +17,6 @@ BEGIN {
 use Carp;
 use HTTP::Tiny;
 use JSON;
-use URI::Escape;
 
 BEGIN {
     my ($ok, $why) = HTTP::Tiny->can_ssl;
@@ -38,19 +37,11 @@ sub api_key {
 sub request {
     my ($method, $endpoint, %params) = @_;
     my $url = 'https://www.googleapis.com' . $endpoint;
-    my $query = '';
 
-    $params{key} = $KEY;
+    $params{key} ||= $KEY;
+    my $query = $http->www_form_urlencode(\%params);
 
-    for my $key (keys %params) {
-        my $val = $params{$key};
-        $query .= '&' . uri_escape($key) . '=' . uri_escape($val);
-    }
-
-    $query =~ s/^./?/;
-    $url .= $query;
-
-    my $response = $http->request($method, $url);
+    my $response = $http->request($method, "$url?$query");
     croak "$response->{status} $response->{reason}" unless $response->{success};
     $response->{content};
 }
