@@ -24,8 +24,8 @@ my %opts;
 GetOptions(
     \%opts,
     'filter|f!',
-    'api-key|k:s',
-    'access-token|t:s',
+    'api-key|k=s',
+    'access-token|t=s',
     'version|v',
 ) or pod2usage(2);
 
