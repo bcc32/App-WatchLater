@@ -1,6 +1,5 @@
 # MakeMaker output
 blib
 Makefile
-MANIFEST
 MYMETA.*
 pm_to_blib
