@@ -164,7 +164,7 @@ say "refresh token: $refresh_token";
 
 =head1 DESCRIPTION
 
-Authenticate with Google APIs using OAuth. Retrieves an access token and a
+Authenticate with Google APIs using OAuth2. Retrieves an access token and a
 refresh token. Access token can be used to authorize API requests, and
 furthermore provides access to user data. Access tokens will expire, so a new
 one can be requested using the refresh token (B<--refresh-token>).
@@ -178,6 +178,7 @@ Google's L<API Console|https://console.developers.google.com/apis/credentials>.
 =over 4
 
 =item B<-i> I<id>, B<--client-id>=I<id>
+
 =item B<-s> I<secret>, B<--client-secret>=I<secret>
 
 =item B<-t> I<token>, B<--refresh-token>=I<token>

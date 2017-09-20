@@ -95,7 +95,7 @@ Accepts YouTube video IDs or watch URLs from stdin, and prints the ID, followed
 by the thumbnail link, followed by description links, to stdout.
 
 An API key is required to access the YouTube Data API. Alternatively, requests
-may be authorized by providing an OAuth access token.
+may be authorized by providing an OAuth2 access token.
 
 =head1 ENVIRONMENT
 
@@ -107,7 +107,7 @@ Set the YouTube Data API key.
 
 =item YT_ACCESS_TOKEN
 
-Set the OAuth access token.
+Set the OAuth2 access token.
 
 =back
 
