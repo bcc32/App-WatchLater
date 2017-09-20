@@ -4,12 +4,15 @@ use warnings;
 
 use ExtUtils::MakeMaker;
 
-my $script = 'bin/App/YtDescLinks/yt-desc-links';
+my @scripts = (
+    'bin/yt-desc-links',
+    'bin/yt-oauth',
+);
 
 WriteMakefile(
     AUTHOR        => ['Aaron L. Zeng <me@bcc32.com>'],
-    ABSTRACT_FROM => $script,
+    ABSTRACT_FROM => 'lib/API/YouTube.pm',
     NAME          => 'App::YtDescLinks',
-    VERSION_FROM  => $script,
-    EXE_FILES     => [$script],
+    VERSION_FROM  => 'lib/API/YouTube.pm',
+    EXE_FILES     => \@scripts,
 );
