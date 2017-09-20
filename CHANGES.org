@@ -1,0 +1,7 @@
+* v2.0.0
+  - changed to an object-oriented API
+  - added yt-oauth script to get access tokens
+  - accept keys and tokens only via environment variable
+
+* 1.00 [2017-09-18 Mon]
+  - first working version
