@@ -4,6 +4,29 @@ use warnings;
 
 package API::YouTube;
 
+=head1 NAME
+
+API::YouTube - access the YouTube API
+
+=head1 SYNOPSIS
+
+    my $api = API::YouTube->new(
+        access_token => ...,
+        api_key      => ...,
+    );
+    # returns the body of the HTTP response as a string
+    $api->request('GET', '/videos', { id => 'Ks-_Mh1QhMc', part => 'snippet' });
+
+=head1 DESCRIPTION
+
+This is a simple module for making requests to the YouTube Data API.
+Authorization is required, and can be obtained by registering for an API key
+from the Google Developer L<API
+Console|https://console.developers.google.com/apis/credentials>. Alternatively,
+obtain user authorization through OAuth2 using the yt-oauth(1) script.
+
+=cut
+
 BEGIN {
     require Exporter;
     our @ISA = qw(Exporter);
@@ -25,6 +48,31 @@ BEGIN {
 
 our $http = HTTP::Tiny->new;
 
+=head1 METHODS
+
+=head2 new
+
+    my $api = API::YouTube->new(%opts)
+
+This constructor returns a new API::YouTube object. Attributes include:
+
+=over 4
+
+=item *
+
+C<api_key> - an API key
+
+=item *
+
+C<access_token> - an OAuth2 access token
+
+=back
+
+At least one of C<api_key> and C<access_token> must be provided. If both are
+provided, C<access_token> is used for authorization.
+
+=cut
+
 sub new {
     my ($class, %opts) = @_;
 
@@ -40,13 +88,21 @@ sub new {
     } => $class;
 }
 
+=head2 request
+
+    my $body = $api->request($method, $endpoint, %params);
+
+Send a request to the specified API endpoint using the given HTTP method. Query
+parameters may be specified in C<%params>.
+
+=cut
+
 sub request {
     my ($self, $method, $endpoint, %params) = @_;
-    my $url = 'https://www.googleapis.com' . $endpoint;
+    my $url = 'https://www.googleapis.com/youtube/v3' . $endpoint;
 
     my %headers;
 
-    # TODO document that token overrides
     if (defined $self->{token}) {
         $headers{Authorization} = 'Bearer ' . $self->{token};
     } else {
@@ -61,11 +117,10 @@ sub request {
     $response->{content};
 }
 
-
 sub request_description_and_thumbnails {
     my ($self, $video_id) = @_;
     my $json = $self->request(
-        'GET', '/youtube/v3/videos',
+        'GET', '/videos',
         id   => $video_id,
         part => 'snippet',
     );
@@ -79,3 +134,9 @@ sub request_description_and_thumbnails {
 }
 
 1;
+
+=head1 AUTHOR
+
+Aaron L. Zeng <me@bcc32.com>
+
+=cut
