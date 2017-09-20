@@ -2,16 +2,16 @@
 use strict;
 use warnings;
 
-package App::YtDescLinks::API;
+package API::YouTube;
 
 BEGIN {
     require Exporter;
     our @ISA = qw(Exporter);
 
-    our @EXPORT = ();
+    our @EXPORT    = ();
     our @EXPORT_OK = ();
 
-    use version; our $VERSION = version->declare('v1.0.0');
+    use version; our $VERSION = version->declare('v2.0.0');
 }
 
 use Carp;

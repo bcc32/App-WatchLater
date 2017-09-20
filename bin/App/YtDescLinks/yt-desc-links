@@ -11,7 +11,7 @@ use List::Util qw(any);
 use Pod::Usage;
 use URI::Find;
 
-use App::YtDescLinks::API;
+use API::YouTube;
 
 use version; our $VERSION = version->declare('v1.0.0');
 
@@ -28,7 +28,7 @@ if ($opts{version}) {
     exit;
 }
 
-my $api = App::YtDescLinks::API->new;
+my $api = API::YouTube->new;
 
 while (my $video_id = <>) {
     chomp $video_id;

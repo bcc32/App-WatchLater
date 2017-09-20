@@ -9,7 +9,7 @@ use constant VIDEO_ID => 'Ks-_Mh1QhMc';
 my $module;
 
 BEGIN {
-    $module = 'App::YtDescLinks::API';
+    $module = 'API::YouTube';
     use_ok($module);
 }
 
