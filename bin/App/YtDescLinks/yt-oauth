@@ -122,11 +122,18 @@ sub refresh_access {
 
 my $access_token;
 my $refresh_token;
+my $show_version;
 GetOptions(
-    'client-id|i=s' => \$CLIENT_ID,
+    'client-id|i=s'     => \$CLIENT_ID,
     'client-secret|s=s' => \$CLIENT_SECRET,
     'refresh-token|r=s' => \$refresh_token,
+    'version|v'         => \$show_version,
 ) or pod2usage(2);
+
+if ($show_version) {
+    say "yt-oauth version $VERSION";
+    exit;
+}
 
 $CLIENT_ID     ||= $ENV{YT_CLIENT_ID};
 $CLIENT_SECRET ||= $ENV{YT_CLIENT_SECRET};
