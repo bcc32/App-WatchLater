@@ -11,11 +11,7 @@ use List::Util qw(any);
 use Pod::Usage;
 use URI::Find;
 
-use App::YtDescLinks::API qw(
-    api_key
-    access_token
-    request_description_and_thumbnails
-);
+use App::YtDescLinks::API;
 
 use version; our $VERSION = version->declare('v1.0.0');
 
@@ -24,8 +20,6 @@ my %opts;
 GetOptions(
     \%opts,
     'filter|f!',
-    'api-key|k=s',
-    'access-token|t=s',
     'version|v',
 ) or pod2usage(2);
 
@@ -34,14 +28,7 @@ if ($opts{version}) {
     exit;
 }
 
-my $key = $opts{'api-key'} || $ENV{YT_API_KEY};
-api_key $key;
-my $token = $opts{'access-token'} || $ENV{YT_ACCESS_TOKEN};
-access_token $token;
-
-if (!defined $key && !defined $token) {
-    die "no API key or token, aborting";
-}
+my $api = App::YtDescLinks::API->new;
 
 while (my $video_id = <>) {
     chomp $video_id;
@@ -92,16 +79,15 @@ sub biggest_thumbnail {
 
 =head1 NAME
 
-App::YtDescLinks - display links to thumbnail image and links from description
+yt-desc-links - display links to thumbnail image and links from description
 
 =head1 SYNOPSIS
 
     yt-desc-links [OPTION]...
 
     -f, --[no]filter    only display links from common image sites (e.g., pixiv)
-    -k, --api-key       set the YouTube Data API key
-    -t, --access-token  set the YouTube Data API access token (OAuth)
     --help              display this help message
+    --version           display version info
 
 =head1 DESCRIPTION
 
@@ -117,11 +103,11 @@ may be authorized by providing an OAuth access token.
 
 =item YT_API_KEY
 
-Set the YouTube Data API key. Can be overridden by command line argument.
+Set the YouTube Data API key.
 
 =item YT_ACCESS_TOKEN
 
-Set the OAuth access token. Can be overridden by command line argument.
+Set the OAuth access token.
 
 =back
 

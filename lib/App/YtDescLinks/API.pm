@@ -9,7 +9,7 @@ BEGIN {
     our @ISA = qw(Exporter);
 
     our @EXPORT = ();
-    our @EXPORT_OK = qw(api_key access_token request_description_and_thumbnails);
+    our @EXPORT_OK = ();
 
     use version; our $VERSION = version->declare('v1.0.0');
 }
@@ -23,32 +23,34 @@ BEGIN {
     croak $why unless $ok;
 }
 
-our $KEY;
-our $ACCESS_TOKEN;
 our $http = HTTP::Tiny->new;
 
-sub api_key {
-    my ($key) = @_;
-    $KEY = $key if defined $key;
-    $KEY;
-}
+sub new {
+    my ($class, %opts) = @_;
 
-sub access_token {
-    my ($access_token) = @_;
-    $ACCESS_TOKEN = $access_token if defined $access_token;
-    $ACCESS_TOKEN;
+    my $key   = $opts{api_key};
+    my $token = $opts{access_token};
+
+    defined $key || defined $token
+        or croak "no API key or access token, aborting";
+
+    bless {
+        key   => $key,
+        token => $token,
+    } => $class;
 }
 
 sub request {
-    my ($method, $endpoint, %params) = @_;
+    my ($self, $method, $endpoint, %params) = @_;
     my $url = 'https://www.googleapis.com' . $endpoint;
 
     my %headers;
 
-    if (defined $ACCESS_TOKEN) {
-        $headers{Authorization} = 'Bearer ' . $ACCESS_TOKEN;
+    # TODO document that token overrides
+    if (defined $self->{token}) {
+        $headers{Authorization} = 'Bearer ' . $self->{token};
     } else {
-        $params{key} ||= $KEY;
+        $params{key} ||= $self->{key};
     }
 
     my $query = $http->www_form_urlencode(\%params);
@@ -61,8 +63,8 @@ sub request {
 
 
 sub request_description_and_thumbnails {
-    my ($video_id) = @_;
-    my $json = request(
+    my ($self, $video_id) = @_;
+    my $json = $self->request(
         'GET', '/youtube/v3/videos',
         id   => $video_id,
         part => 'snippet',
