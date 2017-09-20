@@ -13,7 +13,7 @@ use URI::Find;
 
 use API::YouTube;
 
-use version; our $VERSION = version->declare('v1.0.0');
+use version; our $VERSION = version->declare('v2.0.1');
 
 my %opts;
 
