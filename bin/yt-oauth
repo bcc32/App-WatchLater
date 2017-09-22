@@ -32,6 +32,10 @@ use constant OAUTH_URL_TEMPLATE => <<URL;
     &client_id=CLIENT_ID
 URL
 
+# We ignore SIGCHLD, which has the effect of causing children to be
+# automatically reaped instead of turning into zombie processes.
+%SIG{CHLD} = 'IGNORE';
+
 sub listen_for_code {
     my ($pipe, $sock) = @_;
     listen($sock, SOMAXCONN) or die "listen: $!";
