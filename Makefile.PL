@@ -4,7 +4,7 @@ use warnings;
 
 use ExtUtils::MakeMaker;
 
-my @scripts = <bin/*>;
+my @scripts = glob 'bin/*';
 
 WriteMakefile(
     AUTHOR        => ['Aaron L. Zeng <me@bcc32.com>'],

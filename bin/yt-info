@@ -38,7 +38,7 @@ my $api = API::YouTube->new(
 my $csv = Text::CSV->new({ eol => $/ });
 $csv->column_names(qw(channel_id channel_title video_id video_title));
 
-binmode STDOUT, ':utf8';
+binmode STDOUT, ':encoding(UTF-8)';
 
 while (<>) {
     chomp;
