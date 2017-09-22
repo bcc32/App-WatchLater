@@ -125,11 +125,7 @@ sub request_description_and_thumbnails {
         part => 'snippet',
     );
     my $obj = decode_json($json);
-    my $item = $obj->{items}[0];
-    unless (defined $item) {
-        croak "couldn't find video with id $video_id";
-        return;
-    }
+    my $item = $obj->{items}[0] or croak "couldn't find video with id $video_id";
     $item->{snippet}{description}, $item->{snippet}{thumbnails};
 }
 
