@@ -36,7 +36,7 @@ BEGIN {
     our @EXPORT    = ();
     our @EXPORT_OK = ();
 
-    use version; our $VERSION = version->declare('v2.0.0');
+    use version; our $VERSION = version->declare('v3.0.0');
 }
 
 use Carp;
