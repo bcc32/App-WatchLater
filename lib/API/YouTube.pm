@@ -25,6 +25,8 @@ from the Google Developer L<API
 Console|https://console.developers.google.com/apis/credentials>. Alternatively,
 obtain user authorization through OAuth2 using the yt-oauth(1) script.
 
+=head1 METHODS
+
 =cut
 
 BEGIN {
@@ -47,8 +49,6 @@ BEGIN {
 }
 
 our $http = HTTP::Tiny->new;
-
-=head1 METHODS
 
 =head2 new
 
@@ -93,7 +93,7 @@ sub new {
     my $body = $api->request($method, $endpoint, %params);
 
 Send a request to the specified API endpoint using the given HTTP method. Query
-parameters may be specified in C<%params>.
+parameters may be specified in C<%params>. Croaks if the request fails.
 
 =cut
 
@@ -117,7 +117,16 @@ sub request {
     $response->{content};
 }
 
-sub request_description_and_thumbnails {
+=head2 get_video
+
+    my \%snippet = $api->get_video($video_id);
+
+Retrieves a YouTube video resource, including the snippet, for the video given
+by C<$video_id>. Croaks if no such video is found.
+
+=cut
+
+sub get_video {
     my ($self, $video_id) = @_;
     my $json = $self->request(
         'GET', '/videos',
@@ -125,8 +134,8 @@ sub request_description_and_thumbnails {
         part => 'snippet',
     );
     my $obj = decode_json($json);
-    my $item = $obj->{items}[0] or croak "couldn't find video with id $video_id";
-    $item->{snippet}{description}, $item->{snippet}{thumbnails};
+    my $item = $obj->{items}[0] or croak "no video with id $video_id";
+    $item->{snippet};
 }
 
 1;

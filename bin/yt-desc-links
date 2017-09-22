@@ -37,10 +37,10 @@ while (my $video_id = <>) {
     chomp $video_id;
     $video_id =~ s/.*\bv=([a-zA-Z0-9_-]+).*/$1/;
     eval {
-        my ($desc, $thumbnails) = $api->request_description_and_thumbnails($video_id);
+        my $snippet = $api->get_video($video_id);
         say $video_id;
-        say biggest_thumbnail($thumbnails);
-        say_uris($desc);
+        say biggest_thumbnail($snippet->{thumbnails});
+        say_uris($snippet->{description});
     };
     warn $@ if $@;
 }

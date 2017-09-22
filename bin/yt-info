@@ -52,18 +52,12 @@ while (<>) {
 
 sub get_video_info {
     my ($vid) = @_;
-    my $resp = $api->request(
-        'GET', '/videos',
-        id   => $vid,
-        part => 'snippet',
-    );
-    my $obj = decode_json($resp);
-    my $item = $obj->{items}[0] or croak "couldn't find video with id $vid";
+    my $snippet = $api->get_video($vid);
     return {
-        channel_id    => $item->{snippet}{channelId},
-        channel_title => $item->{snippet}{channelTitle},
-        video_id      => $item->{id},
-        video_title   => $item->{snippet}{title},
+        channel_id    => $snippet->{channelId},
+        channel_title => $snippet->{channelTitle},
+        video_id      => $vid,
+        video_title   => $snippet->{title},
     };
 }
 
