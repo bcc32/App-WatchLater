@@ -1,5 +1,7 @@
 bin/yt-desc-links
+bin/yt-info
 bin/yt-oauth
+CHANGES.org
 INSTALL
 lib/API/YouTube.pm
 LICENSE

@@ -1,0 +1,127 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+
+package App::YtDescLinks;
+
+use feature qw(say);
+
+use Carp;
+use Getopt::Long qw(:config auto_help bundling);
+use JSON;
+use List::Util qw(any);
+use Pod::Usage;
+use Text::CSV;
+use URI::Find;
+
+use API::YouTube;
+
+use version; our $VERSION = version->declare('v1.0.0');
+
+my %opts;
+
+GetOptions(
+    \%opts,
+    'version|v',
+) or pod2usage(2);
+
+if ($opts{version}) {
+    say "yt-desc-links version $VERSION";
+    exit;
+}
+
+my $api = API::YouTube->new(
+    api_key      => $ENV{YT_API_KEY},
+    access_token => $ENV{YT_ACCESS_TOKEN},
+);
+
+my $csv = Text::CSV->new({ eol => $/ });
+$csv->column_names(qw(channel_id channel_title video_id video_title));
+
+binmode STDOUT, ':utf8';
+
+while (<>) {
+    chomp;
+    /^[a-zA-Z0-9_-]+$/ or carp "malformed video id '$_', skipping" and next;
+    eval {
+        my $info = get_video_info($_);
+        $csv->print_hr(*STDOUT, $info);
+    };
+    warn $@ if $@;
+}
+
+sub get_video_info {
+    my ($vid) = @_;
+    my $resp = $api->request(
+        'GET', '/videos',
+        id   => $vid,
+        part => 'snippet',
+    );
+    my $obj = decode_json($resp);
+    my $item = $obj->{items}[0] or croak "couldn't find video with id $vid";
+    return {
+        channel_id    => $item->{snippet}{channelId},
+        channel_title => $item->{snippet}{channelTitle},
+        video_id      => $item->{id},
+        video_title   => $item->{snippet}{title},
+    };
+}
+
+=head1 NAME
+
+yt-info - display channel and video info
+
+=head1 SYNOPSIS
+
+    yt-info [OPTION]...
+
+    --help     display this help message
+    --version  display version info
+
+=head1 DESCRIPTION
+
+Accepts YouTube video IDs or watch URLs from stdin, and prints the following
+information to stdout (as CSV-formatted rows):
+
+=over 4
+
+=item *
+
+channel ID
+
+=item *
+
+channel title
+
+=item *
+
+video ID
+
+=item *
+
+video title
+
+=back
+
+An API key is required to access the YouTube Data API. Alternatively, requests
+may be authorized by providing an OAuth2 access token.
+
+=head1 ENVIRONMENT
+
+=over 4
+
+=item YT_API_KEY
+
+Set the YouTube Data API key.
+
+=item YT_ACCESS_TOKEN
+
+Set the OAuth2 access token.
+
+=back
+
+=head1 AUTHOR
+
+Aaron L. Zeng <me@bcc32.com>
+
+=cut

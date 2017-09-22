@@ -4,10 +4,7 @@ use warnings;
 
 use ExtUtils::MakeMaker;
 
-my @scripts = (
-    'bin/yt-desc-links',
-    'bin/yt-oauth',
-);
+my @scripts = <bin/*>;
 
 WriteMakefile(
     AUTHOR        => ['Aaron L. Zeng <me@bcc32.com>'],
