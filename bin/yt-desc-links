@@ -38,7 +38,6 @@ while (my $video_id = <>) {
     $video_id =~ s/.*\bv=([a-zA-Z0-9_-]+).*/$1/;
     eval {
         my ($desc, $thumbnails) = $api->request_description_and_thumbnails($video_id);
-        next unless defined $desc;
         say $video_id;
         say biggest_thumbnail($thumbnails);
         say_uris($desc);
