@@ -13,7 +13,8 @@ WriteMakefile(
     VERSION_FROM  => 'lib/API/YouTube.pm',
     EXE_FILES     => \@scripts,
     PREREQ_PM     => {
-        "HTTP::Tiny" => 0,
-        "JSON"       => 0,
+        "HTTP::Tiny"      => 0,
+        "IO::Socket::SSL" => 0,
+        "JSON"            => 0,
     },
 );
