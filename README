@@ -5,18 +5,24 @@ NAME
 SYNOPSIS
         yt-desc-links [OPTION]...
 
-        -f, --[no]filter   only display links from common image sites (e.g., pixiv)
-        -k, --api-key KEY  set the YouTube Data API key
-        --help             display this help message
+        -f, --[no]filter    only display links from common image sites (e.g., pixiv)
+        --help              display this help message
+        --version           display version info
 
 DESCRIPTION
     Accepts YouTube video IDs or watch URLs from stdin, and prints the ID,
     followed by the thumbnail link, followed by description links, to
     stdout.
 
-    An API key is required to access the YouTube Data API. It may be
-    specified on the command line (`-k') or by environment variable
-    (`YT_API_KEY').
+    An API key is required to access the YouTube Data API. Alternatively,
+    requests may be authorized by providing an OAuth2 access token.
+
+ENVIRONMENT
+    YT_API_KEY
+        Set the YouTube Data API key.
+
+    YT_ACCESS_TOKEN
+        Set the OAuth2 access token.
 
 AUTHOR
     Aaron L. Zeng <me@bcc32.com>
