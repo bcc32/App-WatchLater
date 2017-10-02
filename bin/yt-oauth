@@ -34,7 +34,7 @@ URL
 
 # We ignore SIGCHLD, which has the effect of causing children to be
 # automatically reaped instead of turning into zombie processes.
-%SIG{CHLD} = 'IGNORE';
+$SIG{CHLD} = 'IGNORE';
 
 sub listen_for_code {
     my ($pipe, $sock) = @_;
