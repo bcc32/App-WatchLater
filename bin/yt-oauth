@@ -43,10 +43,7 @@ sub listen_for_code {
     select $client; $| = 1;
     print "204 No Content\r\n\r\n";
     my $response = <$client>;
-    close $client;
-    close $sock;
     print $pipe $response;
-    close $pipe;
     exit;
 }
 
@@ -85,7 +82,6 @@ sub authenticate {
     say "Please visit $oauth_url in your browser.";
 
     my $response = <$fh>;
-    close $fh;
 
     if ($response =~ m{GET /\?error=(\S+) HTTP/1.1}) {
         croak "error authenticating: $1";
