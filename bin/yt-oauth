@@ -24,7 +24,7 @@ our $CLIENT_ID;
 our $CLIENT_SECRET;
 our $http = HTTP::Tiny->new;
 
-use constant OAUTH_URL_TEMPLATE => <<URL;
+use constant OAUTH_URL_TEMPLATE => <<URL =~ s/\s//gr;
   https://accounts.google.com/o/oauth2/v2/auth
     ?scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutube.readonly
     &response_type=code
@@ -78,7 +78,6 @@ sub authenticate {
     my $oauth_url = OAUTH_URL_TEMPLATE;
     $oauth_url =~ s/CLIENT_ID/$CLIENT_ID/;
     $oauth_url =~ s/PORT/$port/;
-    $oauth_url =~ s/\s//g;
     say "Please visit $oauth_url in your browser.";
 
     my $response = <$fh>;
