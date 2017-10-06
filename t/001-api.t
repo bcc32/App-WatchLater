@@ -2,16 +2,15 @@
 use strict;
 use warnings;
 
-use Test::More tests => 5;
+use Test::More;
+use Test::RequiresInternet;
+
+plan tests => 5;
 
 use constant VIDEO_ID => 'Ks-_Mh1QhMc';
 
-my $module;
-
-BEGIN {
-    $module = 'API::YouTube';
-    use_ok($module);
-}
+my $module = 'API::YouTube';
+use_ok($module);
 
 my @methods = qw(new get_video);
 
