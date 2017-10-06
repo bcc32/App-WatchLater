@@ -20,6 +20,7 @@ WriteMakefile(
         'IO::Socket::SSL' => 0,
         'JSON'            => 0,
         'Text::CSV'       => 0,
+        'Try::Tiny'       => 0,
         'URI::Find'       => 0,
     },
     TEST_REQUIRES => {

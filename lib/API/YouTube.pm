@@ -25,8 +25,6 @@ from the Google Developer L<API
 Console|https://console.developers.google.com/apis/credentials>. Alternatively,
 obtain user authorization through OAuth2 using the yt-oauth(1) script.
 
-=head1 METHODS
-
 =cut
 
 BEGIN {
@@ -49,6 +47,18 @@ BEGIN {
 }
 
 our $http = HTTP::Tiny->new;
+
+=head1 CONSTANTS
+
+=head2 VIDEO_ID_REGEX
+
+A pattern that matches YouTube video IDs.
+
+=cut
+
+use constant VIDEO_ID_REGEX => qr/[a-z0-9_-]+/i;
+
+=head1 METHODS
 
 =head2 new
 

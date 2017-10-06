@@ -12,6 +12,7 @@ use JSON;
 use List::Util qw(any);
 use Pod::Usage;
 use Text::CSV;
+use Try::Tiny;
 use URI::Find;
 
 use API::YouTube;
@@ -40,14 +41,17 @@ $csv->column_names(qw(channel_id channel_title video_id video_title));
 
 binmode STDOUT, ':encoding(UTF-8)';
 
+my $regex = API::YouTube::VIDEO_ID_REGEX;
+
 while (<>) {
     chomp;
-    /^[a-zA-Z0-9_-]+$/ or carp "malformed video id '$_', skipping" and next;
-    eval {
+    /^$regex$/ or carp "malformed video id '$_', skipping" and next;
+    try {
         my $info = get_video_info($_);
         $csv->print_hr(*STDOUT, $info);
+    } catch {
+        print STDERR $_;
     };
-    warn $@ if $@;
 }
 
 sub get_video_info {
