@@ -8,4 +8,4 @@ LICENSE
 Makefile.PL
 MANIFEST			This list of files
 README
-t/api.t
+t/001-api.t
