@@ -1,6 +1,7 @@
 #!/usr/bin/env perl
-use strict;
+use 5.016;
 use warnings;
+use autodie;
 
 package API::YouTube;
 

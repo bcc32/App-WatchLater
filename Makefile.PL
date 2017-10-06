@@ -1,4 +1,5 @@
 #!/usr/bin/env perl
+use 5.016;
 use strict;
 use warnings;
 
@@ -22,6 +23,7 @@ WriteMakefile(
         'Text::CSV'       => 0,
         'Try::Tiny'       => 0,
         'URI::Find'       => 0,
+        'perl'            => '5.016',
     },
     TEST_REQUIRES => {
         'Test::More'             => 0,
