@@ -13,7 +13,7 @@ use JSON;
 use Pod::Usage;
 use Socket;
 
-use version; our $VERSION = version->declare('v1.0.1');
+use API::YouTube;
 
 BEGIN {
     my ($ok, $why) = HTTP::Tiny->can_ssl;
@@ -130,7 +130,7 @@ GetOptions(
 ) or pod2usage(2);
 
 if ($show_version) {
-    say "yt-oauth version $VERSION";
+    say "yt-oauth $API::YouTube::VERSION";
     exit;
 }
 

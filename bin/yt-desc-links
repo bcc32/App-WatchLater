@@ -15,8 +15,6 @@ use URI::Find;
 
 use API::YouTube;
 
-use version; our $VERSION = version->declare('v2.0.1');
-
 my %opts;
 
 GetOptions(
@@ -26,7 +24,7 @@ GetOptions(
 ) or pod2usage(2);
 
 if ($opts{version}) {
-    say "yt-desc-links version $VERSION";
+    say "yt-desc-links $API::YouTube::VERSION";
     exit;
 }
 
