@@ -37,7 +37,7 @@ my $api = API::YouTube->new(
 );
 
 my $csv = Text::CSV->new({ eol => $/ });
-$csv->column_names(qw(channel_id channel_title video_id video_title));
+$csv->column_names(qw(video_id video_title channel_id channel_title));
 
 binmode STDOUT, ':encoding(UTF-8)';
 
@@ -85,19 +85,19 @@ information to stdout (as CSV-formatted rows):
 
 =item *
 
-channel ID
-
-=item *
-
-channel title
-
-=item *
-
 video ID
 
 =item *
 
 video title
+
+=item *
+
+channel ID
+
+=item *
+
+channel title
 
 =back
 
