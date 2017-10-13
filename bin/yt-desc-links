@@ -23,7 +23,7 @@ GetOptions(
 ) or pod2usage(2);
 
 if ($opts{version}) {
-    say "yt-desc-links $API::YouTube::VERSION";
+    say 'yt-desc-links ' . API::YouTube->VERSION;
     exit;
 }
 

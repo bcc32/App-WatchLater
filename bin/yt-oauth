@@ -128,7 +128,7 @@ GetOptions(
 ) or pod2usage(2);
 
 if ($show_version) {
-    say "yt-oauth $API::YouTube::VERSION";
+    say 'yt-oauth ' . API::YouTube->VERSION;
     exit;
 }
 
