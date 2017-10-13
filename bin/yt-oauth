@@ -38,7 +38,7 @@ $SIG{CHLD} = 'IGNORE';
 sub listen_for_code {
     my ($pipe, $sock) = @_;
     listen $sock, SOMAXCONN;
-    accept my $client, $sock;
+    accept(my $client, $sock);
     select $client; $| = 1;
     print "204 No Content\r\n\r\n";
     my $response = <$client>;
