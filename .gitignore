@@ -1,5 +1,5 @@
-# MakeMaker output
-blib
-Makefile
+# Build.PL output
+Build
 MYMETA.*
-pm_to_blib
+_build
+blib

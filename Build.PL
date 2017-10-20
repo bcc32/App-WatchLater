@@ -3,20 +3,14 @@ use 5.016;
 use strict;
 use warnings;
 
-use ExtUtils::MakeMaker;
+use Module::Build;
 
 my @scripts = glob 'bin/*';
 
-WriteMakefile(
-    AUTHOR             => ['Aaron L. Zeng <me@bcc32.com>'],
-    NAME               => 'API::YouTube',
-    ABSTRACT_FROM      => 'lib/API/YouTube.pm',
-    VERSION_FROM       => 'lib/API/YouTube.pm',
-    EXE_FILES          => \@scripts,
-    CONFIGURE_REQUIRES => {
-        'ExtUtils::MakeMaker' => 0,
-    },
-    PREREQ_PM => {
+my $build = Module::Build->new(
+    module_name  => 'API::YouTube',
+    script_files => \@scripts,
+    requires => {
         'HTTP::Tiny'      => 0,
         'IO::Socket::SSL' => 0,
         'JSON'            => 0,
@@ -25,8 +19,10 @@ WriteMakefile(
         'URI::Find'       => 0,
         'perl'            => '5.016',
     },
-    TEST_REQUIRES => {
+    test_requires => {
         'Test::More'             => 0,
         'Test::RequiresInternet' => 0,
     },
 );
+
+$build->create_build_script;

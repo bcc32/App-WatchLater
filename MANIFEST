@@ -1,6 +1,7 @@
 bin/yt-desc-links
 bin/yt-info
 bin/yt-oauth
+Build.PL
 CHANGES.org
 INSTALL
 lib/API/YouTube.pm
