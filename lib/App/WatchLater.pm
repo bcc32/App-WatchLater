@@ -9,6 +9,8 @@ use DBI;
 use Getopt::Long qw(:config auto_help gnu_getopt);
 use Pod::Usage;
 
+use App::WatchLater::YouTube;
+
 =head1 NAME
 
 App::WatchLater - Manage your YouTube Watch Later videos
@@ -130,6 +132,28 @@ CREATE TABLE IF NOT EXISTS videos(
 SQL
 }
 
+=head2 add
+
+TODO
+
+=cut
+
+sub add {
+  my ($dbh, $api, @video_ids) = @_;
+
+  # FIXME use a transaction
+  my $sth = $dbh->prepare_cached(<<'SQL');
+INSERT OR REPLACE INTO videos (video_id, video_title, channel_id, channel_title, watched)
+VALUES (?, ?, ?, ?, 0);
+SQL
+
+  for my $vid (@video_ids) {
+    my $snippet = $api->get_video($vid);
+    $sth->execute($vid, $snippet->{title},
+                  $snippet->{channelId}, $snippet->{channelTitle});
+  }
+}
+
 =head2 main
 
 TODO
@@ -138,13 +162,27 @@ TODO
 
 sub main {
   my $dbpath = "$ENV{HOME}/.watch-later.db";
+  my $add = 0;
+  my $watch = 0;
 
   GetOptions(
     'db-path|d=s' => \$dbpath,
+    'add|a'       => \$add,
+    'watch|w'     => \$watch,
   ) or pod2usage(2);
+
+  die "Add and Watch modes both specified" if $add && $watch;
+
+  my $handler = $watch ? \&watch : \&add;
 
   my $dbh = DBI->connect("dbi:SQLite:dbname=$dbpath");
   ensure_schema($dbh);
+
+  my $api = App::WatchLater::YouTube->new(
+    api_key      => $ENV{YT_API_KEY},
+    access_token => $ENV{YT_ACCESS_TOKEN},
+  );
+  $handler->($dbh, $api, @ARGV);
 }
 
 =head1 AUTHOR
