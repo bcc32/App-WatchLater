@@ -42,15 +42,35 @@ obtain user authorization through OAuth2 using the yt-oauth(1) script.
 A list of functions that can be exported.  You can delete this section
 if you don't export anything, such as for a purely object-oriented module.
 
+=cut
+
+BEGIN {
+  require Exporter;
+  our @ISA       = qw(Exporter);
+  our @EXPORT    = qw(find_video_id);
+  our @EXPORT_OK = qw(find_video_id);
+}
+
 =head1 SUBROUTINES/METHODS
 
-=head2 VIDEO_ID_REGEX
+=head2 find_video_id
 
-A pattern that matches YouTube video IDs.
+    my $video_id = find_video_id($url);
+
+Find a YouTube video ID from a YouTube watch URL. Also accepts I<youtu.be>
+shortened URLs and literal video IDs.
 
 =cut
 
-use constant VIDEO_ID_REGEX => qr/[a-z0-9_-]+/i;
+my $regex = qr/[a-z0-9_-]+/i;
+
+sub find_video_id {
+  local $_ = shift;
+  return $1 if m{youtube\.com/watch.*\bv=($regex)};
+  return $1 if m{youtu.be/($regex)};
+  return $1 if m{^$regex$};
+  die "'$_' is not a valid video ID";
+}
 
 =head2 new
 

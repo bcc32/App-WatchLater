@@ -116,7 +116,8 @@ sub main {
     api_key      => $ENV{YT_API_KEY},
     access_token => $ENV{YT_ACCESS_TOKEN},
   );
-  $handler->($dbh, $api, @ARGV);
+
+  $handler->($dbh, $api, map { find_video_id($_) } @ARGV);
 }
 
 =head1 AUTHOR
