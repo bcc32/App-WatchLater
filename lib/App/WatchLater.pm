@@ -26,21 +26,6 @@ our $VERSION = '0.01';
 
 =head1 SYNOPSIS
 
-    watch-later [(-a [-n]) | (-w [-m])] [<video-id-or-url>...]
-
-    -a, --add        add videos to the queue (default)
-    -n, --no-unmark  don't mark re-added videos as unwatched
-
-    -w, --watch      remove videos from the queue
-    -m, --mark-only  only mark videos as watched; don't actually open them in
-                     the browser
-
-    -d, --db-path <file>  use the given file as the database (default is
-                          ~/.watch-later.db)
-
-    --help     display this help message
-    --version  display version info
-
 TODO example code using the module...
 
 =head1 DESCRIPTION
@@ -52,57 +37,6 @@ have to go to a bit more effort.
 
 An API key is required to access the YouTube Data API. Alternatively, requests
 may be authorized by providing an OAuth2 access token.
-
-=head1 OPTIONS
-
-=head2 Universal Options
-
-=head3 B<-d> <file>, B<--db-path>=<file>
-
-Use the provided file as the database, instead of the default database at
-F<$HOME/.watch-later.db>.
-
-=head2 Modes of Operation
-
-=head3 B<-a>, B<--add>
-
-Add videos to the queue. Marks a video as unwatched if it is already in the
-database. This the default if no mode is specified.
-
-=head3 B<-w>, B<--watch>
-
-Watch a video from the queue by opening its URL in the browser. Marks the given
-video as watched. If no video is provided on the command line, picks one at
-random.
-
-=head2 Add Mode
-
-=head3 B<-n>, B<--no-unmark>
-
-Normally, adding a video to the database when it is already present will cause
-it to be marked as unwatched. This flag disables that behavior and leaves it in
-whatever state it was found.
-
-=head2 Watch Mode
-
-=head3 B<-m>, B<--mark-only>
-
-Normally, watching a video will cause its YouTube URL to be opened in a browser.
-This flag causes the video to simply be marked as watched and no browser opened.
-
-=head1 ENVIRONMENT
-
-=over 4
-
-=item YT_API_KEY
-
-Set the YouTube Data API key.
-
-=item YT_ACCESS_TOKEN
-
-Set the OAuth2 access token.
-
-=back
 
 =head1 EXPORT
 
