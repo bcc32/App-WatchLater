@@ -43,7 +43,7 @@ watch-later - manage a queue of YouTube videos
 
 =head1 SYNOPSIS
 
-    watch-later [(-a [-n]) | (-w [-m])] [<video_id_or_url>...]
+    watch-later [(-a [-n]) | (-w [-m])] [<video-id-or-url>...]
 
     -a, --add        add videos to the queue (default)
     -n, --no-unmark  don't mark re-added videos as unwatched
