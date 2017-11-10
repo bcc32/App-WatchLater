@@ -47,10 +47,6 @@ if you don't export anything, such as for a purely object-oriented module.
 
 =head1 SUBROUTINES/METHODS
 
-=head2 ensure_schema
-
-TODO
-
 =cut
 
 sub ensure_schema {
@@ -65,12 +61,6 @@ CREATE TABLE IF NOT EXISTS videos(
 );
 SQL
 }
-
-=head2 add
-
-TODO
-
-=cut
 
 sub add {
   my ($dbh, $api, @video_ids) = @_;
@@ -117,12 +107,6 @@ SQL
   $sth->execute($vid) or die $sth->errstr;
 }
 
-=head2 watch
-
-TODO
-
-=cut
-
 sub watch {
   my ($dbh, $api, @video_ids) = @_;
 
@@ -135,12 +119,6 @@ sub watch {
     mark_watched($dbh, $vid);
   }
 }
-
-=head2 main
-
-TODO
-
-=cut
 
 sub main {
   my $dbpath = "$ENV{HOME}/.watch-later.db";
