@@ -1,10 +1,22 @@
+.travis.yml
+bin/yt
+bin/yt-desc-links
+bin/yt-info
+bin/yt-oauth
 Build.PL
 Changes
+CHANGES.org
+INSTALL
 lib/App/WatchLater.pm
 lib/App/WatchLater/YouTube.pm
+LICENSE
 MANIFEST			This list of files
+META.json
+META.yml
 README
 t/00-load.t
+t/001-api.t
 t/manifest.t
 t/pod-coverage.t
 t/pod.t
+xt/boilerplate.t
