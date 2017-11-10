@@ -101,8 +101,8 @@ sub open_video {
 sub mark_watched {
   my ($dbh, $vid) = @_;
   my $sth = $dbh->prepare(<<'SQL');
-    UPDATE videos SET watched=1
-    WHERE video_id = ?;
+UPDATE videos SET watched=1
+WHERE video_id = ?;
 SQL
   $sth->execute($vid) or die $sth->errstr;
 }
