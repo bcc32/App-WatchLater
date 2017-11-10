@@ -76,6 +76,7 @@ sub add {
   my ($dbh, $api, @video_ids) = @_;
 
   # FIXME use a transaction
+  # FIXME two lines
   my $sth = $dbh->prepare_cached(<<'SQL');
 INSERT OR REPLACE INTO videos (video_id, video_title, channel_id, channel_title, watched)
 VALUES (?, ?, ?, ?, 0);
@@ -85,6 +86,53 @@ SQL
     my $snippet = $api->get_video($vid);
     $sth->execute($vid, $snippet->{title},
                   $snippet->{channelId}, $snippet->{channelTitle});
+  }
+}
+
+sub get_random_video {
+  my ($dbh) = @_;
+  my $sth = $dbh->prepare_cached(<<'SQL');
+SELECT video_id, video_title, channel_id, channel_title FROM videos
+WHERE NOT watched
+ORDER BY RANDOM()
+LIMIT 1;
+SQL
+  $sth->execute or die $sth->errstr;
+  my $row = $sth->fetchrow_hashref or die 'no videos';
+  $row->{video_id};
+}
+
+sub open_video {
+  # TODO
+  my ($vid) = @_;
+  say $vid;
+}
+
+sub mark_watched {
+  my ($dbh, $vid) = @_;
+  my $sth = $dbh->prepare(<<'SQL');
+    UPDATE videos SET watched=1
+    WHERE video_id = ?;
+SQL
+  $sth->execute($vid) or die $sth->errstr;
+}
+
+=head2 watch
+
+TODO
+
+=cut
+
+sub watch {
+  my ($dbh, $api, @video_ids) = @_;
+
+  if (!@video_ids) {
+    push @video_ids, get_random_video($dbh);
+  }
+
+  for my $vid (@video_ids) {
+    open_video($vid);
+    mark_watched($dbh, $vid);
   }
 }
 
