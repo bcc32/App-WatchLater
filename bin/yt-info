@@ -7,7 +7,6 @@ package App::YtDescLinks;
 
 use Carp;
 use Getopt::Long qw(:config auto_help bundling);
-use JSON;
 use List::Util qw(any);
 use Pod::Usage;
 use Text::CSV;

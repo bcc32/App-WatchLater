@@ -1,0 +1,35 @@
+#!/usr/bin/env perl
+
+use 5.016;
+use warnings;
+use utf8;
+
+use Carp;
+use DBI;
+use Getopt::Long qw(:config auto_help bundling);
+
+sub ensure_schema {
+  my $dbh = shift;
+  $dbh->do(<<'SQL') or die $dbh->errstr;
+CREATE TABLE IF NOT EXISTS videos(
+  video_id      TEXT PRIMARY KEY,
+  video_title   TEXT,
+  channel_id    TEXT,
+  channel_title TEXT,
+  watched       INTEGER NOT NULL DEFAULT 0
+);
+SQL
+}
+
+sub main {
+  my %opts = (
+    dbpath => "$ENV{HOME}/.watch-later.db",
+  );
+  my $href = shift;
+  @opts{keys %$href} = values %$href;
+
+  my $dbh = DBI->connect("dbi:SQLite:dbname=$opts{dbpath}");
+  ensure_schema($dbh);
+}
+
+exit main() unless caller();
