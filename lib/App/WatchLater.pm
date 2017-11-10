@@ -4,9 +4,14 @@ use 5.016;
 use strict;
 use warnings;
 
+use Carp;
+use DBI;
+use Getopt::Long qw(:config auto_help gnu_getopt);
+use Pod::Usage;
+
 =head1 NAME
 
-App::WatchLater - The great new App::WatchLater!
+App::WatchLater - Manage your YouTube Watch Later videos
 
 =head1 VERSION
 
@@ -19,34 +24,127 @@ our $VERSION = '0.01';
 
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
+    watch-later [(-a [-n]) | (-w [-m])] [<video-id-or-url>...]
 
-Perhaps a little code snippet.
+    -a, --add        add videos to the queue (default)
+    -n, --no-unmark  don't mark re-added videos as unwatched
 
-    use App::WatchLater;
+    -w, --watch      remove videos from the queue
+    -m, --mark-only  only mark videos as watched; don't actually open them in
+                     the browser
 
-    my $foo = App::WatchLater->new();
-    ...
+    -d, --db-path <file>  use the given file as the database (default is
+                          ~/.watch-later.db)
+
+    --help     display this help message
+    --version  display version info
+
+TODO example code using the module...
+
+=head1 DESCRIPTION
+
+Manages a Watch Later queue of YouTube videos, in case you're one of the kinds
+of people whose Watch Later lists get too out of hand. Google has deprecated the
+ability to access the B<WL> playlist via the YouTube Data API, which means we
+have to go to a bit more effort.
+
+An API key is required to access the YouTube Data API. Alternatively, requests
+may be authorized by providing an OAuth2 access token.
+
+=head1 OPTIONS
+
+=head2 Universal Options
+
+=head3 B<-d> <file>, B<--db-path>=<file>
+
+Use the provided file as the database, instead of the default database at
+F<$HOME/.watch-later.db>.
+
+=head2 Modes of Operation
+
+=head3 B<-a>, B<--add>
+
+Add videos to the queue. Marks a video as unwatched if it is already in the
+database. This the default if no mode is specified.
+
+=head3 B<-w>, B<--watch>
+
+Watch a video from the queue by opening its URL in the browser. Marks the given
+video as watched. If no video is provided on the command line, picks one at
+random.
+
+=head2 Add Mode
+
+=head3 B<-n>, B<--no-unmark>
+
+Normally, adding a video to the database when it is already present will cause
+it to be marked as unwatched. This flag disables that behavior and leaves it in
+whatever state it was found.
+
+=head2 Watch Mode
+
+=head3 B<-m>, B<--mark-only>
+
+Normally, watching a video will cause its YouTube URL to be opened in a browser.
+This flag causes the video to simply be marked as watched and no browser opened.
+
+=head1 ENVIRONMENT
+
+=over 4
+
+=item YT_API_KEY
+
+Set the YouTube Data API key.
+
+=item YT_ACCESS_TOKEN
+
+Set the OAuth2 access token.
+
+=back
 
 =head1 EXPORT
+
+TODO
 
 A list of functions that can be exported.  You can delete this section
 if you don't export anything, such as for a purely object-oriented module.
 
 =head1 SUBROUTINES/METHODS
 
-=head2 function1
+=head2 ensure_schema
+
+TODO
 
 =cut
 
-sub function1 {
+sub ensure_schema {
+  my $dbh = shift;
+  $dbh->do(<<'SQL') or die $dbh->errstr;
+CREATE TABLE IF NOT EXISTS videos(
+  video_id      TEXT PRIMARY KEY,
+  video_title   TEXT,
+  channel_id    TEXT,
+  channel_title TEXT,
+  watched       INTEGER NOT NULL DEFAULT 0
+);
+SQL
 }
 
-=head2 function2
+=head2 main
+
+TODO
 
 =cut
 
-sub function2 {
+sub main {
+  my $dbpath = "$ENV{HOME}/.watch-later.db";
+
+  GetOptions(
+    'db-path|d=s' => \$dbpath,
+  ) or pod2usage(2);
+
+  my $dbh = DBI->connect("dbi:SQLite:dbname=$dbpath");
+  ensure_schema($dbh);
 }
 
 =head1 AUTHOR
