@@ -66,9 +66,9 @@ sub add {
   my ($dbh, $api, @video_ids) = @_;
 
   # FIXME use a transaction
-  # FIXME two lines
   my $sth = $dbh->prepare_cached(<<'SQL');
-INSERT OR REPLACE INTO videos (video_id, video_title, channel_id, channel_title, watched)
+INSERT OR REPLACE INTO videos
+(video_id, video_title, channel_id, channel_title, watched)
 VALUES (?, ?, ?, ?, 0);
 SQL
 
