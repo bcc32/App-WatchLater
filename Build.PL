@@ -21,7 +21,6 @@ my $builder = Module::Build->new(
     'HTTP::Tiny'      => '0.055',
     'IO::Socket::SSL' => 0,
     'JSON'            => 0,
-    'Text::CSV'       => 0,
     'Try::Tiny'       => 0,
     'URI::Find'       => 0,
     'perl'            => '5.016',

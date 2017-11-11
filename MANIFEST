@@ -1,7 +1,6 @@
 .travis.yml
 bin/watch-later
 bin/yt-desc-links
-bin/yt-info
 bin/yt-oauth
 Build.PL
 Changes
