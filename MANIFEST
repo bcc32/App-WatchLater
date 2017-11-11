@@ -11,8 +11,6 @@ lib/App/WatchLater.pm
 lib/App/WatchLater/YouTube.pm
 LICENSE
 MANIFEST			This list of files
-META.json
-META.yml
 README
 t/00-load.t
 t/001-api.t
