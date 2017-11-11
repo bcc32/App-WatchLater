@@ -7,8 +7,6 @@ my $builder = Module::Build->new(
   module_name         => 'App::WatchLater',
   license             => 'mit',
   dist_author         => q{Aaron L. Zeng <me@bcc32.com>},
-  dist_version_from   => 'lib/App/WatchLater.pm',
-  release_status      => 'stable',
   configure_requires  => {
     'Module::Build'   => '0',
   },
