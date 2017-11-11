@@ -39,8 +39,13 @@ obtain user authorization through OAuth2 using the yt-oauth(1) script.
 
 =head1 EXPORT
 
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
+=over 4
+
+=item *
+
+C<find_video_id> - exported by default.
+
+=back
 
 =cut
 
