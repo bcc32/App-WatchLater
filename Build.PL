@@ -27,6 +27,7 @@ my $builder = Module::Build->new(
   },
   test_requires       => {
     'Test::More'                => 0,
+    'Test::Exception'           => 0,
     'Test::MockObject::Extends' => 0,
   },
   add_to_cleanup     => [ 'App-WatchLater-*' ],
