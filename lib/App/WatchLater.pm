@@ -92,10 +92,21 @@ SQL
   $row->{video_id};
 }
 
+sub get_browser {
+  return $ENV{BROWSER} if exists $ENV{BROWSER};
+  for ($^O) {
+    if (/MSWin32/ || /cygwin/) { return 'start'    }
+    if (/darwin/)              { return 'open'     }
+    if (/linux/)               { return 'xdg-open' }
+    croak 'unsupported operating system';
+  }
+}
+
 sub open_video {
-  # TODO
   my ($vid) = @_;
-  say $vid;
+  my $browser = get_browser();
+  my $url = "https://youtu.be/$vid";
+  system { $browser } $browser, $url;
 }
 
 sub mark_watched {
