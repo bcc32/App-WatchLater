@@ -26,7 +26,7 @@ our $VERSION = '0.01';
 
 =head1 SYNOPSIS
 
-TODO example code using the module...
+    exit App::WatchLater::main();
 
 =head1 DESCRIPTION
 
@@ -49,7 +49,7 @@ if you don't export anything, such as for a purely object-oriented module.
 
 =cut
 
-sub ensure_schema {
+sub _ensure_schema {
   my $dbh = shift;
   $dbh->do(<<'SQL') or die $dbh->errstr;
 CREATE TABLE IF NOT EXISTS videos(
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS videos(
 SQL
 }
 
-sub add {
+sub _add {
   my ($dbh, $api, @video_ids) = @_;
 
   my $sth = $dbh->prepare_cached(<<'SQL');
@@ -78,7 +78,7 @@ SQL
   }
 }
 
-sub get_random_video {
+sub _get_random_video {
   my ($dbh) = @_;
   my $sth = $dbh->prepare_cached(<<'SQL');
 SELECT video_id, video_title, channel_id, channel_title FROM videos
@@ -91,7 +91,7 @@ SQL
   $row->{video_id};
 }
 
-sub get_browser {
+sub _get_browser {
   return $ENV{BROWSER} if exists $ENV{BROWSER};
   for ($^O) {
     if (/MSWin32/ || /cygwin/) { return 'start'    }
@@ -101,14 +101,14 @@ sub get_browser {
   }
 }
 
-sub open_video {
+sub _open_video {
   my ($vid) = @_;
-  my $browser = get_browser();
+  my $browser = _get_browser();
   my $url = "https://youtu.be/$vid";
   system { $browser } $browser, $url;
 }
 
-sub mark_watched {
+sub _mark_watched {
   my ($dbh, $vid) = @_;
   my $sth = $dbh->prepare(<<'SQL');
 UPDATE videos SET watched=1
@@ -117,19 +117,29 @@ SQL
   $sth->execute($vid) or die $sth->errstr;
 }
 
-sub watch {
+sub _watch {
   my ($dbh, $api, @video_ids) = @_;
 
   if (!@video_ids) {
-    push @video_ids, get_random_video($dbh);
+    push @video_ids, _get_random_video($dbh);
   }
 
   for my $vid (@video_ids) {
-    open_video($vid);
-    mark_watched($dbh, $vid);
+    _open_video($vid);
+    _mark_watched($dbh, $vid);
   }
 }
 
+=head2 main
+
+    main();
+
+C<main()> runs the watch-later command line interface. It reads arguments
+directly from C<@ARGV> using L<Getopt::Long>.
+
+=cut
+
+# TODO a better module interface to main()
 sub main {
   my $dbpath = "$ENV{HOME}/.watch-later.db";
   my $add = 0;
@@ -143,10 +153,10 @@ sub main {
 
   croak "Add and Watch modes both specified" if $add && $watch;
 
-  my $handler = $watch ? \&watch : \&add;
+  my $handler = $watch ? \&_watch : \&_add;
 
   my $dbh = DBI->connect("dbi:SQLite:dbname=$dbpath");
-  ensure_schema($dbh);
+  _ensure_schema($dbh);
 
   my $api = App::WatchLater::YouTube->new(
     api_key      => $ENV{YT_API_KEY},
