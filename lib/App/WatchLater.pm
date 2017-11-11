@@ -88,7 +88,7 @@ ORDER BY RANDOM()
 LIMIT 1;
 SQL
   $sth->execute or die $sth->errstr;
-  my $row = $sth->fetchrow_hashref or die 'no videos';
+  my $row = $sth->fetchrow_hashref or croak 'no videos';
   $row->{video_id};
 }
 
@@ -142,7 +142,7 @@ sub main {
     'watch|w'     => \$watch,
   ) or pod2usage(2);
 
-  die "Add and Watch modes both specified" if $add && $watch;
+  croak "Add and Watch modes both specified" if $add && $watch;
 
   my $handler = $watch ? \&watch : \&add;
 
