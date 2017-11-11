@@ -87,11 +87,16 @@ This constructor returns a new API object. Attributes include:
 
 =item *
 
-C<api_key> - an API key
+C<http> - an instance of HTTP::Tiny. If none is provided, a default new instance
+is used.
 
 =item *
 
-C<access_token> - an OAuth2 access token
+C<api_key> - an API key.
+
+=item *
+
+C<access_token> - an OAuth2 access token.
 
 =back
 
@@ -104,17 +109,15 @@ use Carp;
 use HTTP::Tiny;
 use JSON;
 
-# FIXME inject
 BEGIN {
     my ($ok, $why) = HTTP::Tiny->can_ssl;
     croak $why unless $ok;
 }
 
-our $http = HTTP::Tiny->new;
-
 sub new {
     my ($class, %opts) = @_;
 
+    my $http  = $opts{http} // HTTP::Tiny->new;
     my $key   = $opts{api_key};
     my $token = $opts{access_token};
 
@@ -122,6 +125,7 @@ sub new {
         or croak "no API key or access token, aborting";
 
     bless {
+        http  => $http,
         key   => $key,
         token => $token,
     } => $class;
@@ -148,8 +152,8 @@ sub request {
         $params{key} ||= $self->{key};
     }
 
-    my $query = $http->www_form_urlencode(\%params);
-    my $response = $http->request($method, "$url?$query", {
+    my $query = $self->{http}->www_form_urlencode(\%params);
+    my $response = $self->{http}->request($method, "$url?$query", {
         headers => \%headers,
                                   });
     croak "$response->{status} $response->{reason}" unless $response->{success};
