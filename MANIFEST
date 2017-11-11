@@ -1,5 +1,5 @@
 .travis.yml
-bin/yt
+bin/watch-later
 bin/yt-desc-links
 bin/yt-info
 bin/yt-oauth
@@ -13,7 +13,7 @@ LICENSE
 MANIFEST			This list of files
 README
 t/00-load.t
-t/001-api.t
+t/01-api.t
 t/manifest.t
 t/pod-coverage.t
 t/pod.t
