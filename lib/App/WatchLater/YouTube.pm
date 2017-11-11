@@ -73,7 +73,7 @@ sub find_video_id {
   local $_ = shift;
   return $1 if m{youtube\.com/watch.*\bv=($regex)};
   return $1 if m{youtu.be/($regex)};
-  return $1 if m{^$regex$};
+  return $1 if m{^($regex)$};
   die "'$_' is not a valid video ID";
 }
 
