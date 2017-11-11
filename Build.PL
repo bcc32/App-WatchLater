@@ -26,8 +26,8 @@ my $builder = Module::Build->new(
     'perl'            => '5.016',
   },
   test_requires       => {
-    'Test::More'             => 0,
-    'Test::RequiresInternet' => 0,
+    'Test::More'                => 0,
+    'Test::MockObject::Extends' => 0,
   },
   add_to_cleanup     => [ 'App-WatchLater-*' ],
 );
