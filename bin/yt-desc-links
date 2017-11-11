@@ -32,8 +32,6 @@ my $api = App::WatchLater::YouTube->new(
     access_token => $ENV{YT_ACCESS_TOKEN},
 );
 
-my $regex = App::WatchLater::YouTube::VIDEO_ID_REGEX;
-
 while (<>) {
     try {
         my $video_id = find_video_id($_);
