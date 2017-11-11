@@ -4,7 +4,7 @@ use warnings;
 
 use JSON;
 
-use Test::More tests => 5;
+use Test::More tests => 6;
 use Test::MockObject::Extends;
 
 use constant VIDEO_ID => 'Ks-_Mh1QhMc';
@@ -17,10 +17,15 @@ my @methods = qw(new get_video);
 can_ok $module, $_ or BAIL_OUT for (@methods);
 
 my $http = Test::MockObject::Extends->new('HTTP::Tiny');
-$http->set_always('request' => {
-  content => do { local $/; <DATA> },
-  success => 1,
-});
+$http->mock('request' => sub {
+              my (undef, undef, $url) = @_;
+              say $url;
+              isnt index($url, VIDEO_ID), -1, 'request URL contains video id';
+              return {
+                content => do { local $/; <DATA> },
+                success => 1,
+              };
+            });
 
 my $api = new_ok($module => [ http => $http, api_key => BOGUS_API_KEY ]);
 my $snippet = $api->get_video(VIDEO_ID);
