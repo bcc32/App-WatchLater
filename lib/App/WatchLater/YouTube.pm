@@ -25,7 +25,7 @@ from the Google Developer L<API
 Console|https://console.developers.google.com/apis/credentials>. Alternatively,
 obtain user authorization through OAuth2 using the yt-oauth(1) script.
 
-    my $api = API::YouTube->new(
+    my $api = App::WatchLater::YouTube->new(
         access_token => ...,
         api_key      => ...,
     );
@@ -74,9 +74,9 @@ sub find_video_id {
 
 =head2 new
 
-    my $api = API::YouTube->new(%opts)
+    my $api = App::WatchLater::YouTube->new(%opts)
 
-This constructor returns a new API::YouTube object. Attributes include:
+This constructor returns a new API object. Attributes include:
 
 =over 4
 
