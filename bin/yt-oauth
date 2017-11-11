@@ -11,8 +11,8 @@ use Pod::Usage;
 use Socket;
 
 BEGIN {
-    my ($ok, $why) = HTTP::Tiny->can_ssl;
-    croak $why unless $ok;
+  my ($ok, $why) = HTTP::Tiny->can_ssl;
+  croak $why unless $ok;
 }
 
 my $CLIENT_ID;
@@ -32,100 +32,100 @@ URL
 $SIG{CHLD} = 'IGNORE';
 
 sub listen_for_code {
-    my ($pipe, $sock) = @_;
-    listen $sock, SOMAXCONN;
-    accept my $client, $sock;
-    select $client; $| = 1;
-    print "204 No Content\r\n\r\n";
-    my $response = <$client>;
-    print $pipe $response;
-    exit;
+  my ($pipe, $sock) = @_;
+  listen $sock, SOMAXCONN;
+  accept my $client, $sock;
+  select $client; $| = 1;
+  print "204 No Content\r\n\r\n";
+  my $response = <$client>;
+  print $pipe $response;
+  exit;
 }
 
 sub start_http_listener {
-    # setup pipe to communicate response back to parent
-    pipe my $r, my $w;
+  # setup pipe to communicate response back to parent
+  pipe my $r, my $w;
 
-    # setup socket for listening
-    socket my $sock, PF_INET, SOCK_STREAM, 0;
-    my $sockaddr = pack_sockaddr_in 0, v127.0.0.1;
-    bind $sock, $sockaddr;
-    my ($port) = unpack_sockaddr_in getsockname $sock;
+  # setup socket for listening
+  socket my $sock, PF_INET, SOCK_STREAM, 0;
+  my $sockaddr = pack_sockaddr_in 0, v127.0.0.1;
+  bind $sock, $sockaddr;
+  my ($port) = unpack_sockaddr_in getsockname $sock;
 
-    if (fork) {
-        # parent
-        close $w;
-        close $sock;
-        return ($port, $r);
-    } else {
-        # child
-        close $r;
-        listen_for_code $w, $sock;
-    }
+  if (fork) {
+    # parent
+    close $w;
+    close $sock;
+    return ($port, $r);
+  } else {
+    # child
+    close $r;
+    listen_for_code $w, $sock;
+  }
 }
 
 sub authenticate {
-    my ($port, $fh) = start_http_listener;
+  my ($port, $fh) = start_http_listener;
 
-    my $oauth_url = OAUTH_URL_TEMPLATE;
-    $oauth_url =~ s/CLIENT_ID/$CLIENT_ID/;
-    $oauth_url =~ s/PORT/$port/;
-    say "Please visit $oauth_url in your browser.";
+  my $oauth_url = OAUTH_URL_TEMPLATE;
+  $oauth_url =~ s/CLIENT_ID/$CLIENT_ID/;
+  $oauth_url =~ s/PORT/$port/;
+  say "Please visit $oauth_url in your browser.";
 
-    my $response = <$fh>;
+  my $response = <$fh>;
 
-    if ($response =~ m{GET /\?error=(\S+) HTTP/1.1}) {
-        croak "error authenticating: $1";
-    }
+  if ($response =~ m{GET /\?error=(\S+) HTTP/1.1}) {
+    croak "error authenticating: $1";
+  }
 
-    $response =~ m{GET /\?code=(\S+) HTTP/1.1} or confess "didn't authenticate";
-    $1, "http://127.0.0.1:$port";
+  $response =~ m{GET /\?code=(\S+) HTTP/1.1} or confess "didn't authenticate";
+  $1, "http://127.0.0.1:$port";
 }
 
 sub get_tokens {
-    my ($auth_code, $redirect_uri) = @_;
-    my $resp = $http->post_form('https://www.googleapis.com/oauth2/v4/token', {
-        code          => $auth_code,
-        client_id     => $CLIENT_ID,
-        client_secret => $CLIENT_SECRET,
-        grant_type    => 'authorization_code',
-        redirect_uri  => $redirect_uri,
-    });
-    croak "$resp->{status} $resp->{reason}" unless $resp->{success};
-    my $json = $resp->{content};
-    my $obj = decode_json($json);
-    $obj->{access_token}, $obj->{refresh_token};
+  my ($auth_code, $redirect_uri) = @_;
+  my $resp = $http->post_form('https://www.googleapis.com/oauth2/v4/token', {
+    code          => $auth_code,
+    client_id     => $CLIENT_ID,
+    client_secret => $CLIENT_SECRET,
+    grant_type    => 'authorization_code',
+    redirect_uri  => $redirect_uri,
+  });
+  croak "$resp->{status} $resp->{reason}" unless $resp->{success};
+  my $json = $resp->{content};
+  my $obj = decode_json($json);
+  $obj->{access_token}, $obj->{refresh_token};
 }
 
 sub refresh_access {
-    my ($refresh_token) = @_;
-    my $resp = $http->post_form('https://www.googleapis.com/oauth2/v4/token', {
-        refresh_token => $refresh_token,
-        client_id     => $CLIENT_ID,
-        client_secret => $CLIENT_SECRET,
-        grant_type    => 'refresh_token',
-    });
-    croak "$resp->{status} $resp->{reason}" unless $resp->{success};
-    my $json = $resp->{content};
-    my $obj = decode_json($json);
-    $obj->{access_token};
+  my ($refresh_token) = @_;
+  my $resp = $http->post_form('https://www.googleapis.com/oauth2/v4/token', {
+    refresh_token => $refresh_token,
+    client_id     => $CLIENT_ID,
+    client_secret => $CLIENT_SECRET,
+    grant_type    => 'refresh_token',
+  });
+  croak "$resp->{status} $resp->{reason}" unless $resp->{success};
+  my $json = $resp->{content};
+  my $obj = decode_json($json);
+  $obj->{access_token};
 }
 
 my $access_token;
 my $refresh_token;
 my $show_version;
 GetOptions(
-    'client-id|i=s'     => \$CLIENT_ID,
-    'client-secret|s=s' => \$CLIENT_SECRET,
-    'refresh-token|r=s' => \$refresh_token,
-    'version|v'         => \$show_version,
+  'client-id|i=s'     => \$CLIENT_ID,
+  'client-secret|s=s' => \$CLIENT_SECRET,
+  'refresh-token|r=s' => \$refresh_token,
+  'version|v'         => \$show_version,
 ) or pod2usage(2);
 
 our $VERSION = '0.01';
 
 if ($show_version) {
-    say 'yt-oauth ' . $VERSION;
-    exit;
+  say 'yt-oauth ' . $VERSION;
+  exit;
 }
 
 $CLIENT_ID     //= $ENV{YT_CLIENT_ID};
@@ -134,10 +134,10 @@ $CLIENT_SECRET //= $ENV{YT_CLIENT_SECRET};
 pod2usage(2) unless defined $CLIENT_ID && defined $CLIENT_SECRET;
 
 if (defined $refresh_token) {
-    $access_token = refresh_access($refresh_token);
+  $access_token = refresh_access($refresh_token);
 } else {
-    my ($auth_code, $redirect_uri) = authenticate;
-    ($access_token, $refresh_token) = get_tokens $auth_code, $redirect_uri;
+  my ($auth_code, $redirect_uri) = authenticate;
+  ($access_token, $refresh_token) = get_tokens $auth_code, $redirect_uri;
 }
 
 say "access token: $access_token";

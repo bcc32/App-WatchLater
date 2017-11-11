@@ -16,65 +16,65 @@ use App::WatchLater::YouTube;
 my %opts;
 
 GetOptions(
-    \%opts,
-    'filter|f!',
-    'version|v',
+  \%opts,
+  'filter|f!',
+  'version|v',
 ) or pod2usage(2);
 
 if ($opts{version}) {
-    say 'yt-desc-links ' . App::WatchLater::YouTube->VERSION;
-    exit;
+  say 'yt-desc-links ' . App::WatchLater::YouTube->VERSION;
+  exit;
 }
 
 my $api = App::WatchLater::YouTube->new(
-    api_key      => $ENV{YT_API_KEY},
-    access_token => $ENV{YT_ACCESS_TOKEN},
+  api_key      => $ENV{YT_API_KEY},
+  access_token => $ENV{YT_ACCESS_TOKEN},
 );
 
 while (<>) {
-    try {
-        my $video_id = find_video_id($_);
-        my $snippet = $api->get_video($video_id);
-        say $video_id;
-        say biggest_thumbnail($snippet->{thumbnails});
-        say_uris($snippet->{description});
-    } catch {
-        print STDERR $_;
-    };
+  try {
+    my $video_id = find_video_id($_);
+    my $snippet = $api->get_video($video_id);
+    say $video_id;
+    say biggest_thumbnail($snippet->{thumbnails});
+    say_uris($snippet->{description});
+  } catch {
+    print STDERR $_;
+  };
 }
 
 use constant FILTERS => (
-    qr/pixiv/,
-    qr/deviantart/,
-    qr/imgur/,
-    qr/zerochan/,
-    qr/anime-pictures/,
+  qr/pixiv/,
+  qr/deviantart/,
+  qr/imgur/,
+  qr/zerochan/,
+  qr/anime-pictures/,
 );
 
 sub should_print {
-    return 1 unless $opts{filter};
+  return 1 unless $opts{filter};
 
-    my ($uri) = @_;
-    any { $uri =~ $_ } FILTERS;
+  my ($uri) = @_;
+  any { $uri =~ $_ } FILTERS;
 }
 
 sub say_uris {
-    my ($text) = @_;
-    my $finder = URI::Find->new(sub { say $_[1] if should_print $_[1] });
-    $finder->find(\$text);
+  my ($text) = @_;
+  my $finder = URI::Find->new(sub { say $_[1] if should_print $_[1] });
+  $finder->find(\$text);
 }
 
 sub biggest_thumbnail {
-    my ($href) = @_;
-    my $maxw = 0;
-    my $url;
-    for my $thumb (values %$href) {
-        if ($thumb->{width} > $maxw) {
-            $maxw = $thumb->{width};
-            $url = $thumb->{url};
-        }
+  my ($href) = @_;
+  my $maxw = 0;
+  my $url;
+  for my $thumb (values %$href) {
+    if ($thumb->{width} > $maxw) {
+      $maxw = $thumb->{width};
+      $url = $thumb->{url};
     }
-    $url;
+  }
+  $url;
 }
 
 =head1 NAME

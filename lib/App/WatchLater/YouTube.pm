@@ -110,25 +110,25 @@ use HTTP::Tiny;
 use JSON;
 
 BEGIN {
-    my ($ok, $why) = HTTP::Tiny->can_ssl;
-    croak $why unless $ok;
+  my ($ok, $why) = HTTP::Tiny->can_ssl;
+  croak $why unless $ok;
 }
 
 sub new {
-    my ($class, %opts) = @_;
+  my ($class, %opts) = @_;
 
-    my $http  = $opts{http} // HTTP::Tiny->new;
-    my $key   = $opts{api_key};
-    my $token = $opts{access_token};
+  my $http  = $opts{http} // HTTP::Tiny->new;
+  my $key   = $opts{api_key};
+  my $token = $opts{access_token};
 
-    defined $key || defined $token
-        or croak "no API key or access token, aborting";
+  defined $key || defined $token
+    or croak "no API key or access token, aborting";
 
-    bless {
-        http  => $http,
-        key   => $key,
-        token => $token,
-    } => $class;
+  bless {
+    http  => $http,
+    key   => $key,
+    token => $token,
+  } => $class;
 }
 
 =head2 request
@@ -141,23 +141,23 @@ parameters may be specified in C<%params>. Croaks if the request fails.
 =cut
 
 sub request {
-    my ($self, $method, $endpoint, %params) = @_;
-    my $url = 'https://www.googleapis.com/youtube/v3' . $endpoint;
+  my ($self, $method, $endpoint, %params) = @_;
+  my $url = 'https://www.googleapis.com/youtube/v3' . $endpoint;
 
-    my %headers;
+  my %headers;
 
-    if (defined $self->{token}) {
-        $headers{Authorization} = 'Bearer ' . $self->{token};
-    } else {
-        $params{key} ||= $self->{key};
-    }
+  if (defined $self->{token}) {
+    $headers{Authorization} = 'Bearer ' . $self->{token};
+  } else {
+    $params{key} ||= $self->{key};
+  }
 
-    my $query = $self->{http}->www_form_urlencode(\%params);
-    my $response = $self->{http}->request($method, "$url?$query", {
-        headers => \%headers,
-                                  });
-    croak "$response->{status} $response->{reason}" unless $response->{success};
-    $response->{content};
+  my $query = $self->{http}->www_form_urlencode(\%params);
+  my $response = $self->{http}->request($method, "$url?$query", {
+    headers => \%headers,
+  });
+  croak "$response->{status} $response->{reason}" unless $response->{success};
+  $response->{content};
 }
 
 =head2 get_video
@@ -170,15 +170,15 @@ by C<$video_id>. Croaks if no such video is found.
 =cut
 
 sub get_video {
-    my ($self, $video_id) = @_;
-    my $json = $self->request(
-        'GET', '/videos',
-        id   => $video_id,
-        part => 'snippet',
-        );
-    my $obj = decode_json($json);
-    my $item = $obj->{items}[0] or croak "no video with id $video_id";
-    $item->{snippet};
+  my ($self, $video_id) = @_;
+  my $json = $self->request(
+    'GET', '/videos',
+    id   => $video_id,
+    part => 'snippet',
+  );
+  my $obj = decode_json($json);
+  my $item = $obj->{items}[0] or croak "no video with id $video_id";
+  $item->{snippet};
 }
 
 =head1 AUTHOR
@@ -258,4 +258,4 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 =cut
 
-1; # End of App::WatchLater::YouTube
+1;                              # End of App::WatchLater::YouTube

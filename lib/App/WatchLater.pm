@@ -87,9 +87,15 @@ SQL
 sub _get_browser {
   return $ENV{BROWSER} if exists $ENV{BROWSER};
   for ($^O) {
-    if (/MSWin32/ || /cygwin/) { return 'start'    }
-    if (/darwin/)              { return 'open'     }
-    if (/linux/)               { return 'xdg-open' }
+    if (/MSWin32/ || /cygwin/) {
+      return 'start';
+    }
+    if (/darwin/) {
+      return 'open';
+    }
+    if (/linux/) {
+      return 'xdg-open';
+    }
     croak 'unsupported operating system';
   }
 }
@@ -236,4 +242,4 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 =cut
 
-1; # End of App::WatchLater
+1;                              # End of App::WatchLater

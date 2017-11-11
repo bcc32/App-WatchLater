@@ -10,10 +10,10 @@ my $builder = Module::Build->new(
   dist_version_from   => 'lib/App/WatchLater.pm',
   release_status      => 'stable',
   configure_requires  => {
-    'Module::Build' => '0',
+    'Module::Build'   => '0',
   },
   build_requires      => {
-    'Test::More' => '0',
+    'Test::More'      => '0',
   },
   requires            => {
     'DBI'             => 0,
