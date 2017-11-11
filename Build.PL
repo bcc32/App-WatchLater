@@ -16,6 +16,8 @@ my $builder = Module::Build->new(
     'Test::More' => '0',
   },
   requires => {
+    'DBI'             => 0,
+    'DBD::SQLite'     => 0,
     'HTTP::Tiny'      => '0.055',
     'IO::Socket::SSL' => 0,
     'JSON'            => 0,
