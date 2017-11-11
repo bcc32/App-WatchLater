@@ -13,7 +13,7 @@ use Text::CSV;
 use Try::Tiny;
 use URI::Find;
 
-use API::YouTube;
+use App::WatchLater::YouTube;
 
 my %opts;
 
@@ -23,11 +23,11 @@ GetOptions(
 ) or pod2usage(2);
 
 if ($opts{version}) {
-    say 'yt-info ' . API::YouTube->VERSION;
+    say 'yt-info ' . App::WatchLater::YouTube->VERSION;
     exit;
 }
 
-my $api = API::YouTube->new(
+my $api = App::WatchLater::YouTube->new(
     api_key      => $ENV{YT_API_KEY},
     access_token => $ENV{YT_ACCESS_TOKEN},
 );
@@ -37,13 +37,10 @@ $csv->column_names(qw(video_id video_title channel_id channel_title));
 
 binmode STDOUT, ':encoding(UTF-8)';
 
-my $regex = API::YouTube::VIDEO_ID_REGEX;
-
 while (<>) {
-    chomp;
-    /^$regex$/ or carp "malformed video id '$_', skipping" and next;
     try {
-        my $info = get_video_info($_);
+        my $video_id = find_video_id($_);
+        my $info = get_video_info($video_id);
         $csv->print_hr(*STDOUT, $info);
     } catch {
         print STDERR $_;
