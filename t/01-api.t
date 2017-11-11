@@ -9,7 +9,7 @@ plan tests => 5;
 
 use constant VIDEO_ID => 'Ks-_Mh1QhMc';
 
-my $module = 'API::YouTube';
+my $module = 'App::WatchLater::YouTube';
 use_ok($module);
 
 my @methods = qw(new get_video);
