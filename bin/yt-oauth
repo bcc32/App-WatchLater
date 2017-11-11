@@ -1,10 +1,10 @@
-#!/usr/bin/env perl
 use 5.016;
+use strict;
 use warnings;
 use autodie;
 
 use Carp;
-use Getopt::Long qw(:config auto_help bundling);
+use Getopt::Long qw(:config auto_help gnu_getopt);
 use HTTP::Tiny;
 use JSON;
 use Pod::Usage;
@@ -15,11 +15,11 @@ BEGIN {
     croak $why unless $ok;
 }
 
-our $CLIENT_ID;
-our $CLIENT_SECRET;
-our $http = HTTP::Tiny->new;
+my $CLIENT_ID;
+my $CLIENT_SECRET;
+my $http = HTTP::Tiny->new;
 
-use constant OAUTH_URL_TEMPLATE => <<URL =~ s/\s//gr;
+use constant OAUTH_URL_TEMPLATE => <<'URL' =~ s/\s//gr;
   https://accounts.google.com/o/oauth2/v2/auth
     ?scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutube.readonly
     &response_type=code
@@ -34,7 +34,7 @@ $SIG{CHLD} = 'IGNORE';
 sub listen_for_code {
     my ($pipe, $sock) = @_;
     listen $sock, SOMAXCONN;
-    accept(my $client, $sock);
+    accept my $client, $sock;
     select $client; $| = 1;
     print "204 No Content\r\n\r\n";
     my $response = <$client>;
@@ -52,9 +52,7 @@ sub start_http_listener {
     bind $sock, $sockaddr;
     my ($port) = unpack_sockaddr_in getsockname $sock;
 
-    # and now we fork
-    my $pid = fork;
-    if ($pid) {
+    if (fork) {
         # parent
         close $w;
         close $sock;
@@ -123,7 +121,6 @@ GetOptions(
     'version|v'         => \$show_version,
 ) or pod2usage(2);
 
-# TODO Fix scripts to match style
 our $VERSION = '0.01';
 
 if ($show_version) {
@@ -131,8 +128,8 @@ if ($show_version) {
     exit;
 }
 
-$CLIENT_ID     ||= $ENV{YT_CLIENT_ID};
-$CLIENT_SECRET ||= $ENV{YT_CLIENT_SECRET};
+$CLIENT_ID     //= $ENV{YT_CLIENT_ID};
+$CLIENT_SECRET //= $ENV{YT_CLIENT_SECRET};
 
 pod2usage(2) unless defined $CLIENT_ID && defined $CLIENT_SECRET;
 

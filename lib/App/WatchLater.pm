@@ -38,13 +38,6 @@ have to go to a bit more effort.
 An API key is required to access the YouTube Data API. Alternatively, requests
 may be authorized by providing an OAuth2 access token.
 
-=head1 EXPORT
-
-TODO
-
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
-
 =head1 SUBROUTINES/METHODS
 
 =cut
