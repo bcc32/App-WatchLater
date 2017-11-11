@@ -9,13 +9,13 @@ my $builder = Module::Build->new(
   dist_author         => q{Aaron L. Zeng <me@bcc32.com>},
   dist_version_from   => 'lib/App/WatchLater.pm',
   release_status      => 'stable',
-  configure_requires => {
+  configure_requires  => {
     'Module::Build' => '0',
   },
-  build_requires => {
+  build_requires      => {
     'Test::More' => '0',
   },
-  requires => {
+  requires            => {
     'DBI'             => 0,
     'DBD::SQLite'     => 0,
     'HTTP::Tiny'      => '0.055',
@@ -25,7 +25,7 @@ my $builder = Module::Build->new(
     'URI::Find'       => 0,
     'perl'            => '5.016',
   },
-  test_requires => {
+  test_requires       => {
     'Test::More'             => 0,
     'Test::RequiresInternet' => 0,
   },
