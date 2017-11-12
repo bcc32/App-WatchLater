@@ -8,6 +8,7 @@ use Carp;
 use DBI;
 use Getopt::Long qw(:config auto_help gnu_getopt);
 use Pod::Usage;
+use Try::Tiny;
 
 use App::WatchLater::YouTube;
 
@@ -65,9 +66,14 @@ VALUES (?, ?, ?, ?, 0);
 SQL
 
   for my $vid (@video_ids) {
-    my $snippet = $api->get_video($vid);
-    $sth->execute($vid, $snippet->{title},
-                  $snippet->{channelId}, $snippet->{channelTitle});
+    try {
+      my $snippet = $api->get_video($vid);
+      $sth->execute($vid, $snippet->{title},
+                    $snippet->{channelId}, $snippet->{channelTitle});
+    } catch {
+      # warn the user and continue
+      print STDERR;
+    };
   }
 }
 
@@ -124,8 +130,13 @@ sub _watch {
   }
 
   for my $vid (@video_ids) {
-    _open_video($vid);
-    _mark_watched($dbh, $vid);
+    try {
+      _open_video($vid);
+      _mark_watched($dbh, $vid);
+    } catch {
+      # warn the user and continue
+      print STDERR;
+    };
   }
 }
 
