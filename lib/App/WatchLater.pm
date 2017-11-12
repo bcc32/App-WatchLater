@@ -57,19 +57,32 @@ SQL
 }
 
 sub _add {
-  my ($dbh, $api, @video_ids) = @_;
+  my ($dbh, $api, $preserve_watched, @video_ids) = @_;
+
+  my $old_watched_sth = $dbh->prepare_cached(<<'SQL');
+SELECT watched FROM videos
+WHERE video_id = ?;
+SQL
 
   my $sth = $dbh->prepare_cached(<<'SQL');
 INSERT OR REPLACE INTO videos
 (video_id, video_title, channel_id, channel_title, watched)
-VALUES (?, ?, ?, ?, 0);
+VALUES (?, ?, ?, ?, ?);
 SQL
 
   for my $vid (@video_ids) {
     try {
+      my $watched = 0;
+
+      if ($preserve_watched) {
+        $old_watched_sth->execute($vid);
+        my $watched = $old_watched_sth->fetchrow_hashref->{watched};
+      }
+
       my $snippet = $api->get_video($vid);
       $sth->execute($vid, $snippet->{title},
-                    $snippet->{channelId}, $snippet->{channelTitle});
+                    $snippet->{channelId}, $snippet->{channelTitle},
+                    $watched);
     } catch {
       # warn the user and continue
       print STDERR;
@@ -123,7 +136,7 @@ SQL
 }
 
 sub _watch {
-  my ($dbh, $api, @video_ids) = @_;
+  my ($dbh, $api, $should_open, @video_ids) = @_;
 
   if (!@video_ids) {
     push @video_ids, _get_random_video($dbh);
@@ -131,7 +144,7 @@ sub _watch {
 
   for my $vid (@video_ids) {
     try {
-      _open_video($vid);
+      _open_video($vid) if $should_open;
       _mark_watched($dbh, $vid);
     } catch {
       # warn the user and continue
@@ -151,21 +164,24 @@ directly from C<@ARGV> using L<Getopt::Long>.
 
 # TODO a better module interface to main()
 sub main {
-  my $dbpath = "$ENV{HOME}/.watch-later.db";
-  my $add = 0;
-  my $watch = 0;
+  my %opts = (
+    dbpath => "$ENV{HOME}/.watch-later.db",
+  );
 
-  GetOptions(
-    'db-path|d=s' => \$dbpath,
-    'add|a'       => \$add,
-    'watch|w'     => \$watch,
+  GetOptions(\%opts,
+    'db-path|d=s',
+    'add|a',
+    'watch|w',
+    # TODO make this a toggle-able option
+    'no-unmark|n',
+    'mark-only|m',
   ) or pod2usage(2);
 
-  croak "Add and Watch modes both specified" if $add && $watch;
+  croak "Add and Watch modes both specified" if $opts{add} && $opts{watch};
 
-  my $handler = $watch ? \&_watch : \&_add;
+  my @video_ids = map { find_video_id($_) } @ARGV;
 
-  my $dbh = DBI->connect("dbi:SQLite:dbname=$dbpath");
+  my $dbh = DBI->connect("dbi:SQLite:dbname=$opts{dbpath}");
   _ensure_schema($dbh);
 
   my $api = App::WatchLater::YouTube->new(
@@ -173,7 +189,11 @@ sub main {
     access_token => $ENV{YT_ACCESS_TOKEN},
   );
 
-  $handler->($dbh, $api, map { find_video_id($_) } @ARGV);
+  if ($opts{watch}) {
+    _watch($dbh, $api, !$opts{'mark-only'}, @video_ids);
+  } else {
+    _add($dbh, $api, !$opts{'no-unmark'}, @video_ids);
+  }
 }
 
 =head1 AUTHOR
