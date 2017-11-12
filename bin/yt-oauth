@@ -5,6 +5,18 @@ use strict;
 use warnings;
 use autodie;
 
+=head1 NAME
+
+yt-oauth - A simple script for retrieving access and refresh tokens
+
+=head1 VERSION
+
+Version 0.02
+
+=cut
+
+our $VERSION = '0.02';
+
 use Carp;
 use Getopt::Long qw(:config auto_help gnu_getopt);
 use HTTP::Tiny;
@@ -123,8 +135,6 @@ GetOptions(
   'version|v'         => \$show_version,
 ) or pod2usage(2);
 
-our $VERSION = '0.01';
-
 if ($show_version) {
   say 'yt-oauth ' . $VERSION;
   exit;
@@ -144,10 +154,6 @@ if (defined $refresh_token) {
 
 say "access token: $access_token";
 say "refresh token: $refresh_token";
-
-=head1 NAME
-
-    yt-oauth - a simple program for retrieving access and refresh tokens
 
 =head1 SYNOPSIS
 
