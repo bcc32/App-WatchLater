@@ -57,32 +57,21 @@ SQL
 }
 
 sub _add {
-  my ($dbh, $api, $preserve_watched, @video_ids) = @_;
+  my ($dbh, $api, $opts, @video_ids) = @_;
 
-  my $old_watched_sth = $dbh->prepare_cached(<<'SQL');
-SELECT watched FROM videos
-WHERE video_id = ?;
-SQL
+  my $on_conflict = $opts->{force} ? 'REPLACE' : 'IGNORE';
 
-  my $sth = $dbh->prepare_cached(<<'SQL');
-INSERT OR REPLACE INTO videos
+  my $sth = $dbh->prepare_cached(<<SQL);
+INSERT OR $on_conflict INTO videos
 (video_id, video_title, channel_id, channel_title, watched)
-VALUES (?, ?, ?, ?, ?);
+VALUES (?, ?, ?, ?, 0);
 SQL
 
   for my $vid (@video_ids) {
     try {
-      my $watched = 0;
-
-      if ($preserve_watched) {
-        $old_watched_sth->execute($vid);
-        my $watched = $old_watched_sth->fetchrow_hashref->{watched};
-      }
-
       my $snippet = $api->get_video($vid);
       $sth->execute($vid, $snippet->{title},
-                    $snippet->{channelId}, $snippet->{channelTitle},
-                    $watched);
+                    $snippet->{channelId}, $snippet->{channelTitle});
     } catch {
       # warn the user and continue
       print STDERR;
@@ -136,7 +125,7 @@ SQL
 }
 
 sub _watch {
-  my ($dbh, $api, $should_open, @video_ids) = @_;
+  my ($dbh, $api, $opts, @video_ids) = @_;
 
   if (!@video_ids) {
     push @video_ids, _get_random_video($dbh);
@@ -144,7 +133,7 @@ sub _watch {
 
   for my $vid (@video_ids) {
     try {
-      _open_video($vid) if $should_open;
+      _open_video($vid) if $opts->{open};
       _mark_watched($dbh, $vid);
     } catch {
       # warn the user and continue
@@ -166,15 +155,17 @@ directly from C<@ARGV> using L<Getopt::Long>.
 sub main {
   my %opts = (
     dbpath => "$ENV{HOME}/.watch-later.db",
+    force  => 0,
+    open   => 1,
   );
 
-  GetOptions(\%opts,
+  GetOptions(
+    \%opts,
     'db-path|d=s',
     'add|a',
     'watch|w',
-    # TODO make this a toggle-able option
-    'no-unmark|n',
-    'mark-only|m',
+    'force|f!',
+    'open|o!',
   ) or pod2usage(2);
 
   croak "Add and Watch modes both specified" if $opts{add} && $opts{watch};
@@ -190,9 +181,9 @@ sub main {
   );
 
   if ($opts{watch}) {
-    _watch($dbh, $api, !$opts{'mark-only'}, @video_ids);
+    _watch($dbh, $api, \%opts, @video_ids);
   } else {
-    _add($dbh, $api, !$opts{'no-unmark'}, @video_ids);
+    _add($dbh, $api, \%opts, @video_ids);
   }
 }
 
