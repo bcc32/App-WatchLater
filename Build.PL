@@ -29,6 +29,11 @@ my $builder = Module::Build->new(
     'Test::MockObject::Extends' => 0,
   },
   add_to_cleanup     => [ 'App-WatchLater-*' ],
+  meta_merge         => {
+    resources        => {
+      repository     => q{https://github.com/bcc32/App-WatchLater}
+    },
+  },
 );
 
 $builder->create_build_script();
