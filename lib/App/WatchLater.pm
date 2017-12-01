@@ -154,9 +154,9 @@ directly from C<@ARGV> using L<Getopt::Long>.
 # TODO a better module interface to main()
 sub main {
   my %opts = (
-    dbpath => "$ENV{HOME}/.watch-later.db",
-    force  => 0,
-    open   => 1,
+    'db-path' => "$ENV{HOME}/.watch-later.db",
+    force     => 0,
+    open      => 1,
   );
 
   GetOptions(
@@ -172,7 +172,8 @@ sub main {
 
   my @video_ids = map { find_video_id($_) } @ARGV;
 
-  my $dbh = DBI->connect("dbi:SQLite:dbname=$opts{dbpath}");
+  my $dbpath = $opts{'db-path'};
+  my $dbh = DBI->connect("dbi:SQLite:dbname=$dbpath");
   _ensure_schema($dbh);
 
   my $api = App::WatchLater::YouTube->new(
