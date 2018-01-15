@@ -11,6 +11,7 @@ use Pod::Usage;
 use Try::Tiny;
 
 use App::WatchLater::YouTube;
+use App::WatchLater::Browser;
 
 =head1 NAME
 
@@ -92,29 +93,6 @@ SQL
   $row->{video_id};
 }
 
-sub _get_browser {
-  return $ENV{BROWSER} if exists $ENV{BROWSER};
-  for ($^O) {
-    if (/MSWin32/ || /cygwin/) {
-      return 'start';
-    }
-    if (/darwin/) {
-      return 'open';
-    }
-    if (/linux/) {
-      return 'xdg-open';
-    }
-    croak 'unsupported operating system';
-  }
-}
-
-sub _open_video {
-  my ($vid) = @_;
-  my $browser = _get_browser();
-  my $url = "https://youtu.be/$vid";
-  system { $browser } $browser, $url;
-}
-
 sub _mark_watched {
   my ($dbh, $vid) = @_;
   my $sth = $dbh->prepare(<<'SQL');
@@ -133,7 +111,7 @@ sub _watch {
 
   for my $vid (@video_ids) {
     try {
-      _open_video($vid) if $opts->{open};
+      open_url("https://youtu.be/$vid") if $opts->{open};
       _mark_watched($dbh, $vid);
     } catch {
       # warn the user and continue
